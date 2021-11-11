@@ -1,0 +1,4 @@
+/*
+iterate through each frame
+check if there is a pixel there and render that
+*/
