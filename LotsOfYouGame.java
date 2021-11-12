@@ -49,6 +49,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final int STARTSTATE = 0;
 
 	public static final String TEST_BOX = "lotsofyou/resource/box.png";
+	public static final String TEST_GRASS = "lotsofyou/resource/grass.png";
 
 	public final int ScreenWidth;
 	public final int ScreenHeight;
@@ -78,6 +79,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	  	addState(new StartState());
 
 		ResourceManager.loadImage(TEST_BOX);
+		ResourceManager.loadImage(TEST_GRASS);
 	}
 
 	public static void main(String[] args) {

@@ -1,5 +1,6 @@
 package lotsofyou;
 
+import jig.Vector;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
@@ -31,21 +32,6 @@ public class SpriteStack extends SpriteSheet {
         this.height = h;
     }
 
-    public void rescale(float scale) {
-        for(int i = 0; i != imgArr.length; ++i) {
-            scaledArr[i] = imgArr[i].getScaledCopy(scale);
-        }
-        this.currScale = scale;
-    }
-
-    public float getScaledWidth() {
-        return scaledArr[0].getWidth();
-    }
-
-    public float getScaledHeight() {
-        return scaledArr[0].getHeight();
-    }
-
     @Override
     public void draw() {
         draw(0, 0);
@@ -53,33 +39,30 @@ public class SpriteStack extends SpriteSheet {
 
     @Override
     public void draw(float x, float y) {
-        if(renderCam.getScale() != currScale) rescale(renderCam.getScale());
-
-        float hypot2 = (float)Math.hypot(width, height) / 2;
-        float w2 = (float)width / 2;
-        float h2 = (float)height / 2;
-
-        float screenPosX = x - renderCam.getX();
-        float screenPosY = y - renderCam.getY();
-
-        float centerOffsetX = screenPosX - renderCam.getWidth() / 2;
-        float centerOffsetY = screenPosY - renderCam.getHeight() / 2;
+        Vector corners[] = new Vector[4];
+        for(int i = 0; i != 4; ++i) {
+            corners[i] = new Vector(x + ((i % 2) * width), y + ((i / 2) * height));
+        }
 
         double cs = Math.cos(Math.toRadians(renderCam.getRotation()));
         double sn = Math.sin(Math.toRadians(renderCam.getRotation()));
 
-        float newCenterOffsetX = (float)(centerOffsetX * cs - centerOffsetY * sn) * renderCam.getScale();
-        float newCenterOffsetY = (float)(centerOffsetY * cs - centerOffsetX * sn) * renderCam.getScale();
-
-        float drawPosX = (newCenterOffsetX + renderCam.getWidth() / 2) +
-                (float)(Math.cos(Math.toRadians(renderCam.getRotation() + 45)) * hypot2 - w2) * renderCam.getScale();
-        float drawPosY = (newCenterOffsetY + renderCam.getHeight() / 2) +
-                (float)(Math.cos(Math.toRadians(renderCam.getRotation() - 45)) * hypot2 - h2) * renderCam.getScale();
+        for(int i = 0; i != 4; ++i) {
+            Vector centerOffset = corners[i].subtract(new Vector(renderCam.getX(), renderCam.getY())).subtract(new Vector(renderCam.getWidth() / 2, renderCam.getHeight() / 2));
+            float newCenterOffsetX = (float)(centerOffset.getX() * cs - centerOffset.getY() * sn) * renderCam.getScale();
+            float newCenterOffsetY = (float)(centerOffset.getX() * sn + centerOffset.getY() * cs) * renderCam.getScale();
+            corners[i] = new Vector(newCenterOffsetX + renderCam.getWidth() / 2, newCenterOffsetY + renderCam.getHeight() / 2);
+        }
 
         int offset = 0;
-        for(Image i : scaledArr) {
-            i.setRotation(renderCam.getRotation());
-            i.draw(drawPosX, drawPosY - (offset++) * renderCam.getScale());
+        for(Image i : imgArr) {
+            i.drawWarped(
+                    corners[0].getX(), corners[0].getY() - (offset * renderCam.getScale()),
+                    corners[1].getX(), corners[1].getY() - (offset * renderCam.getScale()),
+                    corners[3].getX(), corners[3].getY() - (offset * renderCam.getScale()),
+                    corners[2].getX(), corners[2].getY() - (offset * renderCam.getScale())
+            );
+            ++offset;
         }
     }
 }
