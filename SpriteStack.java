@@ -56,8 +56,8 @@ public class SpriteStack extends SpriteSheet {
         }
 
         int offset = 0;
-        for(Image i : imgArr) {
-            i.drawWarped(
+        for(int i = imgArr.length - 1; i != -1; --i) {
+            imgArr[i].drawWarped(
                     corners[0].getX(), corners[0].getY() - (offset * renderCam.getScale()),
                     corners[1].getX(), corners[1].getY() - (offset * renderCam.getScale()),
                     corners[3].getX(), corners[3].getY() - (offset * renderCam.getScale()),
