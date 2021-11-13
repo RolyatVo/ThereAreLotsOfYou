@@ -11,6 +11,7 @@ public class StartState extends BasicGameState {
 
   SpriteStack box;
   UprightSprite grass;
+  SpriteStack tree;
   Camera cam = new Camera(960, 960);
   int frame = 0;
 
@@ -25,6 +26,7 @@ public class StartState extends BasicGameState {
   @Override
   public void init(GameContainer container, StateBasedGame game) throws SlickException {
     box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
+    tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
     grass = new UprightSprite(LotsOfYouGame.TEST_GRASS, cam);
     cam.setScale(5);
   }
@@ -55,6 +57,8 @@ public class StartState extends BasicGameState {
 
     box.draw(posX, posY);
     box.draw(posX, posY + 45);
+
+    tree.draw(posX + 32, posY + 32);
 
     int xDir = 0;
     int yDir = 0;
