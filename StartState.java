@@ -5,12 +5,17 @@ import org.newdawn.slick.*;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
+import java.util.Random;
+
 public class StartState extends BasicGameState {
 
   SpriteStack box;
-  SpriteStack grass;
+  UprightSprite grass;
   Camera cam = new Camera(960, 960);
   int frame = 0;
+
+  float x[] = new float[16];
+  float y[] = new float[16];
 
   @Override
   public int getID() {
@@ -20,7 +25,7 @@ public class StartState extends BasicGameState {
   @Override
   public void init(GameContainer container, StateBasedGame game) throws SlickException {
     box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
-    grass = new SpriteStack(LotsOfYouGame.TEST_GRASS, 16, 16, cam);
+    grass = new UprightSprite(LotsOfYouGame.TEST_GRASS, cam);
     cam.setScale(5);
   }
 
@@ -28,23 +33,28 @@ public class StartState extends BasicGameState {
   @Override
   public void enter(GameContainer container, StateBasedGame game) {
 
+    Random rand = new Random();
+    for(int i = 0; i != 16; ++ i) {
+      x[i] = rand.nextInt(160);
+      y[i] = rand.nextInt(160);
+    }
   }
 
   @Override
   public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+    g.setBackground(new Color(83, 124, 68));
+
     ++frame;
 
     float posX = 960.0f / 2;
     float posY = 960.0f / 2;
 
-    for(int i = 0; i != 16; ++i) {
-      for (int j = 0; j != 16; ++j) {
-        grass.draw(posX + (i-8) * 16, posY + (j-8) * 16);
-      }
+    for(int i = 0; i != 10; ++i) {
+      grass.draw(posX + x[i], posY + y[i]);
     }
 
     box.draw(posX, posY);
-//    box.draw(posX, posY + 45);
+    box.draw(posX, posY + 45);
 
     int xDir = 0;
     int yDir = 0;

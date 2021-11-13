@@ -48,7 +48,8 @@ public class SpriteStack extends SpriteSheet {
         double sn = Math.sin(Math.toRadians(renderCam.getRotation()));
 
         for(int i = 0; i != 4; ++i) {
-            Vector centerOffset = corners[i].subtract(new Vector(renderCam.getX(), renderCam.getY())).subtract(new Vector(renderCam.getWidth() / 2, renderCam.getHeight() / 2));
+            Vector centerOffset = corners[i].subtract(new Vector(renderCam.getX(), renderCam.getY())).subtract(
+                    new Vector(renderCam.getWidth() / 2, renderCam.getHeight() / 2));
             float newCenterOffsetX = (float)(centerOffset.getX() * cs - centerOffset.getY() * sn) * renderCam.getScale();
             float newCenterOffsetY = (float)(centerOffset.getX() * sn + centerOffset.getY() * cs) * renderCam.getScale();
             corners[i] = new Vector(newCenterOffsetX + renderCam.getWidth() / 2, newCenterOffsetY + renderCam.getHeight() / 2);

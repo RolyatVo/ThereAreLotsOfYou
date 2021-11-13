@@ -49,7 +49,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final int STARTSTATE = 0;
 
 	public static final String TEST_BOX = "lotsofyou/resource/box.png";
-	public static final String TEST_GRASS = "lotsofyou/resource/grass.png";
+	public static final String TEST_GRASS = "lotsofyou/resource/grass_2.png";
 
 	public final int ScreenWidth;
 	public final int ScreenHeight;
