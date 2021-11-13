@@ -49,6 +49,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final int STARTSTATE = 0;
 
 	public static final String TEST_BOX = "lotsofyou/resource/box.png";
+	public static final String TEST_GRASS = "lotsofyou/resource/grass_2.png";
 
 	public final int ScreenWidth;
 	public final int ScreenHeight;
@@ -78,13 +79,14 @@ public class LotsOfYouGame extends StateBasedGame {
 	  	addState(new StartState());
 
 		ResourceManager.loadImage(TEST_BOX);
+		ResourceManager.loadImage(TEST_GRASS);
 	}
 
 	public static void main(String[] args) {
 		AppGameContainer app;
 		try {
-			app = new AppGameContainer(new LotsOfYouGame("Bounce!", 1280, 1280));
-			app.setDisplayMode(1280, 1280, false);
+			app = new AppGameContainer(new LotsOfYouGame("Bounce!", 960, 960));
+			app.setDisplayMode(960, 960, false);
 			app.setVSync(true);
 
 			app.start();
