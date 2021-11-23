@@ -1,15 +1,22 @@
 package lotsofyou;
 
+import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class StartState extends BasicGameState {
 
   SpriteStack box;
+  SpriteStack otherPlayers;
   UprightSprite grass;
   SpriteStack tree;
   Camera cam = new Camera(960, 960);
@@ -18,6 +25,9 @@ public class StartState extends BasicGameState {
   float x[] = new float[16];
   float y[] = new float[16];
 
+
+
+
   @Override
   public int getID() {
     return LotsOfYouGame.STARTSTATE;
@@ -25,10 +35,14 @@ public class StartState extends BasicGameState {
 
   @Override
   public void init(GameContainer container, StateBasedGame game) throws SlickException {
+   // otherPlayers = new ArrayList<>();
     box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
     tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
     grass = new UprightSprite(LotsOfYouGame.TEST_GRASS, cam);
+    otherPlayers = new SpriteStack(LotsOfYouGame.TEST_TREE2, 40, 40, cam);
+
     cam.setScale(5);
+    serverConnect();
   }
 
 
@@ -57,7 +71,7 @@ public class StartState extends BasicGameState {
 
     box.draw(posX, posY);
     box.draw(posX, posY + 45);
-
+    otherPlayers.draw(posX - 100,posY - 100);
     tree.draw(posX + 32, posY + 32);
 
     int xDir = 0;
@@ -82,5 +96,61 @@ public class StartState extends BasicGameState {
   @Override
   public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
 
+  }
+
+
+  private Socket socket;
+  private int playerID;
+  private ReadServer rsRunnable;
+  private WriteServer wsRunnable;
+
+  private void serverConnect() {
+    try {
+      socket = new Socket("localhost", 55555);
+      DataInputStream in = new DataInputStream(socket.getInputStream());
+      DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+      playerID = in.readInt();
+      System.out.println("You are player #" + playerID);
+
+      rsRunnable = new ReadServer(in);
+      wsRunnable = new WriteServer(out);
+
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  private class ReadServer implements Runnable {
+    private DataInputStream dataIN;
+
+    public ReadServer (DataInputStream in) {
+      dataIN = in;
+      System.out.println("Read to Server runnable created!!");
+
+
+    }
+    public void run() {
+
+    }
+  }
+  private class WriteServer implements Runnable {
+    private DataOutputStream dataOUT;
+
+    public WriteServer (DataOutputStream out) {
+      dataOUT = out;
+      System.out.println("Write to Server runnable created!!");
+
+
+    }
+    public void run() {
+//      try {
+//        while(true) {
+//
+//        }
+//      } catch (IOException ex) {
+//        ex.printStackTrace();
+//      }
+    }
   }
 }

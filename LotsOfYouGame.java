@@ -9,9 +9,9 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.opengl.renderer.Renderer;
 import org.newdawn.slick.state.StateBasedGame;
 
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-
+import javax.xml.crypto.Data;
+import java.io.*;
+import java.net.*;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 /**
@@ -51,6 +51,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String TEST_BOX = "lotsofyou/resource/box.png";
 	public static final String TEST_GRASS = "lotsofyou/resource/grass_2.png";
 	public static final String TEST_TREE = "lotsofyou/resource/tree.png";
+	public static final String TEST_TREE2 = "lotsofyou/resource/tree2.png";
 
 	public final int ScreenWidth;
 	public final int ScreenHeight;
@@ -74,6 +75,12 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.filterMethod = ResourceManager.FILTER_NEAREST;
   }
 
+	public int getScreenHeight() {
+		return ScreenHeight;
+	}
+	public int getScreenWidth () {
+		return ScreenWidth;
+	}
 
 	@Override
 	public void initStatesList(GameContainer container) throws SlickException {
@@ -82,20 +89,19 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(TEST_BOX);
 		ResourceManager.loadImage(TEST_GRASS);
 		ResourceManager.loadImage(TEST_TREE);
+		ResourceManager.loadImage(TEST_TREE2);
 	}
 
 	public static void main(String[] args) {
 		AppGameContainer app;
 		try {
-			app = new AppGameContainer(new LotsOfYouGame("Bounce!", 960, 960));
+			app = new AppGameContainer(new LotsOfYouGame("ThereAreLotsOfYou!", 960, 960));
 			app.setDisplayMode(960, 960, false);
 			app.setVSync(true);
 
 			app.start();
-		} catch (SlickException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-    } catch (Exception e) {
-      e.printStackTrace();
     }
-  }
+	}
 }
