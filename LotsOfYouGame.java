@@ -95,8 +95,8 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static void main(String[] args) {
 		AppGameContainer app;
 		try {
-			app = new AppGameContainer(new LotsOfYouGame("ThereAreLotsOfYou!", 960, 960));
-			app.setDisplayMode(960, 960, false);
+			app = new AppGameContainer(new LotsOfYouGame("ThereAreLotsOfYou!", 960, 540));
+			app.setDisplayMode(960, 540, false);
 			app.setVSync(true);
 
 			app.start();

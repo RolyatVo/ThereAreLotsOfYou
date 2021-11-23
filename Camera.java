@@ -1,6 +1,7 @@
 package lotsofyou;
 
 import jig.Vector;
+import org.newdawn.slick.Input;
 
 public class Camera {
     private float x;
@@ -11,6 +12,8 @@ public class Camera {
 
     private float scale;
     private float rotation;
+
+    private final float moveRatio = 0.08f;
 
     public Camera(float width_, float height_) {
         this(0, 0, width_, height_);
@@ -96,5 +99,28 @@ public class Camera {
 
     public void rotate(float angle) {
         this.rotation += angle;
+    }
+
+    public void update(Player targetPlayer, Input in) {
+        x += moveRatio * (targetPlayer.getX() - getCenterX());
+        y += moveRatio * (targetPlayer.getY() - getCenterY());
+    }
+
+    public Vector screenToWorld(float x, float y) {
+        System.out.println(x + ", " + y);
+        double cs = Math.cos(Math.toRadians(rotation));
+        double sn = Math.sin(Math.toRadians(rotation));
+
+        float worldX = x - getWidth() / 2;
+
+/*
+        Vector centerOffset = corners[i].subtract(new Vector(renderCam.getX(), renderCam.getY())).subtract(
+                new Vector(renderCam.getWidth() / 2, renderCam.getHeight() / 2));
+        float newCenterOffsetX = (float)(centerOffset.getX() * cs - centerOffset.getY() * sn) * renderCam.getScale();
+        float newCenterOffsetY = (float)(centerOffset.getX() * sn + centerOffset.getY() * cs) * renderCam.getScale();
+        corners[i] = new Vector(newCenterOffsetX + renderCam.getWidth() / 2, newCenterOffsetY + renderCam.getHeight() / 2);
+ */
+
+        return new Vector(0, 0);
     }
 }
