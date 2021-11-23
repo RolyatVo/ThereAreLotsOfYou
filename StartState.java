@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -21,6 +22,7 @@ public class StartState extends BasicGameState {
   SpriteStack tree;
   Camera cam = new Camera(960, 960);
   int frame = 0;
+  float zoom = 5;
 
   float x[] = new float[16];
   float y[] = new float[16];
@@ -62,6 +64,7 @@ public class StartState extends BasicGameState {
 
     ++frame;
 
+
     float posX = 960.0f / 2;
     float posY = 960.0f / 2;
 
@@ -71,7 +74,7 @@ public class StartState extends BasicGameState {
 
     box.draw(posX, posY);
     box.draw(posX, posY + 45);
-    otherPlayers.draw(posX - 100,posY - 100);
+    otherPlayers.draw(0,0);
     tree.draw(posX + 32, posY + 32);
 
     int xDir = 0;
@@ -80,11 +83,14 @@ public class StartState extends BasicGameState {
     if(Keyboard.isKeyDown(Keyboard.KEY_D)) ++xDir;
     if(Keyboard.isKeyDown(Keyboard.KEY_W)) --yDir;
     if(Keyboard.isKeyDown(Keyboard.KEY_S)) ++yDir;
+    if(Keyboard.isKeyDown(Keyboard.KEY_I)) zoom += (zoom > 8) ? 0 : 0.25f;
+    if(Keyboard.isKeyDown(Keyboard.KEY_O)) zoom -= (zoom < 1.25) ? 0 : 0.25f;
 
     int rotDir = 0;
     if(Keyboard.isKeyDown(Keyboard.KEY_J)) ++rotDir;
     if(Keyboard.isKeyDown(Keyboard.KEY_K)) --rotDir;
     cam.rotate(rotDir);
+    cam.setScale(zoom);
 
     float rotation = cam.getRotation();
     float transX = (float)Math.sin(Math.toRadians(rotation)) * yDir;
