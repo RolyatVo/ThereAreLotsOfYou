@@ -1,6 +1,7 @@
 package lotsofyou;
 
 import jig.Vector;
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Input;
 
 public class Camera {
@@ -104,23 +105,32 @@ public class Camera {
     public void update(Player targetPlayer, Input in) {
         x += moveRatio * (targetPlayer.getX() - getCenterX());
         y += moveRatio * (targetPlayer.getY() - getCenterY());
+
+        if(Math.abs(targetPlayer.getRotation() - rotation) < Math.abs(rotation - targetPlayer.getRotation())) {
+            rotation += moveRatio * (targetPlayer.getRotation() - rotation);
+        } else {
+            rotation -= moveRatio * (rotation - targetPlayer.getRotation());
+        }
+
+//        int zoom = 0;
+//        if(in.isKeyDown(Keyboard.KEY_N)) --zoom;
+//        if(in.isKeyDown(Keyboard.KEY_M)) ++zoom;
+//        scale += (float)zoom * 0.2f;
+
+//        int rotDir = 0;
+//        if(in.isKeyDown(Keyboard.KEY_J)) ++rotDir;
+//        if(in.isKeyDown(Keyboard.KEY_K)) --rotDir;
+//        rotation += (float) rotDir * 0.5f;
     }
 
     public Vector screenToWorld(float x, float y) {
-        System.out.println(x + ", " + y);
-        double cs = Math.cos(Math.toRadians(rotation));
-        double sn = Math.sin(Math.toRadians(rotation));
+        double cs = Math.cos(Math.toRadians(-rotation));
+        double sn = Math.sin(Math.toRadians(-rotation));
 
-        float worldX = x - getWidth() / 2;
-
-/*
-        Vector centerOffset = corners[i].subtract(new Vector(renderCam.getX(), renderCam.getY())).subtract(
-                new Vector(renderCam.getWidth() / 2, renderCam.getHeight() / 2));
-        float newCenterOffsetX = (float)(centerOffset.getX() * cs - centerOffset.getY() * sn) * renderCam.getScale();
-        float newCenterOffsetY = (float)(centerOffset.getX() * sn + centerOffset.getY() * cs) * renderCam.getScale();
-        corners[i] = new Vector(newCenterOffsetX + renderCam.getWidth() / 2, newCenterOffsetY + renderCam.getHeight() / 2);
- */
-
-        return new Vector(0, 0);
+        float newCenterOffsetX = x - (width / 2);
+        float newCenterOffsetY = y - (height / 2);
+        float oldCenterOffsetX = (float)(newCenterOffsetX * cs - newCenterOffsetY * sn) / scale;
+        float oldCenterOffsetY = (float)(newCenterOffsetX * sn + newCenterOffsetY * cs) / scale;
+        return new Vector(oldCenterOffsetX + (width / 2) + this.x, oldCenterOffsetY + (height / 2) + this.y);
     }
 }

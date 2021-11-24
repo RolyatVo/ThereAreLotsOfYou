@@ -1,5 +1,6 @@
 package lotsofyou;
 
+import jig.Vector;
 import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
@@ -60,9 +61,8 @@ public class StartState extends BasicGameState {
 
   @Override
   public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-    player.update(delta, container.getInput());
+    player.update(delta, container.getInput(), cam);
     cam.update(player, container.getInput());
-    cam.screenToWorld(container.getInput().getMouseX(), container.getInput().getMouseY());
   }
 
 

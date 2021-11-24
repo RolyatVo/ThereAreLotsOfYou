@@ -1,5 +1,6 @@
 package lotsofyou;
 
+import jig.Vector;
 import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Input;
@@ -31,7 +32,7 @@ public class Player {
         this.rotation = 0;
     }
 
-    void update(float delta, Input in) {
+    void update(float delta, Input in, Camera cam) {
         float deltaSeconds = delta / 1000;
 
         int xDir = 0;
@@ -41,20 +42,21 @@ public class Player {
         if(in.isKeyDown(Keyboard.KEY_W)) --yDir;
         if(in.isKeyDown(Keyboard.KEY_S)) ++yDir;
 
-        int rotDir = 0;
-        if(in.isKeyDown(Keyboard.KEY_J)) ++rotDir;
-        if(in.isKeyDown(Keyboard.KEY_K)) --rotDir;
-
-        rotation +=  rotDir;
-
         float transX = (float)Math.sin(Math.toRadians(rotation)) * (yDir * moveSpeed * deltaSeconds);
         float transY = (float)Math.cos(Math.toRadians(rotation)) * (yDir * moveSpeed * deltaSeconds);
 
-        transX += (float)Math.cos(Math.toRadians(rotation)) * (xDir * moveSpeed * deltaSeconds);
-        transY += (float)Math.sin(Math.toRadians(rotation)) * (xDir * moveSpeed * deltaSeconds);
+        transX += (float)Math.sin(Math.toRadians(rotation + 90)) * (xDir * moveSpeed * deltaSeconds);
+        transY += (float)Math.cos(Math.toRadians(rotation + 90)) * (xDir * moveSpeed * deltaSeconds);
 
         x += transX;
         y += transY;
+
+        if(in.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
+            Vector mousePos = cam.screenToWorld(in.getMouseX(), in.getMouseY());
+            rotation = (float)mousePos.subtract(new Vector(x, y)).getRotation() + cam.getRotation();
+            System.out.println(rotation);
+            playerSprite.setRotation(rotation);
+        }
     }
 
 
