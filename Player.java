@@ -16,7 +16,7 @@ public class Player {
     private float width;
     private float height;
 
-    private final float moveSpeed = 20.0f;
+    private final float moveSpeed = 50.0f;
 
     private float rotation;
 
@@ -42,19 +42,18 @@ public class Player {
         if(in.isKeyDown(Keyboard.KEY_W)) --yDir;
         if(in.isKeyDown(Keyboard.KEY_S)) ++yDir;
 
-        float transX = (float)Math.sin(Math.toRadians(rotation)) * (yDir * moveSpeed * deltaSeconds);
-        float transY = (float)Math.cos(Math.toRadians(rotation)) * (yDir * moveSpeed * deltaSeconds);
+        float transX = (float)Math.sin(Math.toRadians(cam.getRotation())) * (yDir * moveSpeed * deltaSeconds);
+        float transY = (float)Math.cos(Math.toRadians(cam.getRotation())) * (yDir * moveSpeed * deltaSeconds);
 
-        transX += (float)Math.sin(Math.toRadians(rotation + 90)) * (xDir * moveSpeed * deltaSeconds);
-        transY += (float)Math.cos(Math.toRadians(rotation + 90)) * (xDir * moveSpeed * deltaSeconds);
+        transX += (float)Math.sin(Math.toRadians(cam.getRotation() + 90)) * (xDir * moveSpeed * deltaSeconds);
+        transY += (float)Math.cos(Math.toRadians(cam.getRotation() + 90)) * (xDir * moveSpeed * deltaSeconds);
 
         x += transX;
         y += transY;
 
         if(in.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
             Vector mousePos = cam.screenToWorld(in.getMouseX(), in.getMouseY());
-            rotation = (float)mousePos.subtract(new Vector(x, y)).getRotation() + cam.getRotation();
-            System.out.println(rotation);
+            rotation = (float)mousePos.subtract(new Vector(x, y)).getRotation(); //+ cam.getRotation();
             playerSprite.setRotation(rotation);
         }
     }

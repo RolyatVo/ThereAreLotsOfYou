@@ -62,7 +62,8 @@ public class StartState extends BasicGameState {
   @Override
   public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
     player.update(delta, container.getInput(), cam);
-    cam.update(player, container.getInput());
+    cam.setTargetPos(player.getX(), player.getY());
+    cam.update(container.getInput());
   }
 
 

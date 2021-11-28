@@ -13,6 +13,10 @@ public class Camera {
 
     private float scale;
     private float rotation;
+    private float targetRotation;
+    private Vector targetPos;
+
+    private final float rotationAmount = 30.0f;
 
     private final float moveRatio = 0.08f;
 
@@ -31,6 +35,8 @@ public class Camera {
         this.height = height_;
         this.scale = scale_;
         this.rotation = rotation_;
+        this.targetRotation = 0;
+        this.targetPos = new Vector(x, y);
     }
 
     public Vector getPos() {
@@ -94,22 +100,30 @@ public class Camera {
         this.y += y;
     }
 
-    public void setRotation(float rotation) {
-        this.rotation = rotation;
+    public void setTargetRotation(float targetRotation) { this.targetRotation = targetRotation; }
+
+    public void setTargetPos(float x, float y) {
+        this.targetPos = new Vector(x, y);
     }
 
     public void rotate(float angle) {
         this.rotation += angle;
     }
 
-    public void update(Player targetPlayer, Input in) {
-        x += moveRatio * (targetPlayer.getX() - getCenterX());
-        y += moveRatio * (targetPlayer.getY() - getCenterY());
+    public void update(Input in) {
+        if(in.isKeyPressed(Keyboard.KEY_Q)) {
+            targetRotation += rotationAmount;
+        } else if (in.isKeyPressed(Keyboard.KEY_E)) {
+            targetRotation -= rotationAmount;
+        }
 
-        if(Math.abs(targetPlayer.getRotation() - rotation) < Math.abs(rotation - targetPlayer.getRotation())) {
-            rotation += moveRatio * (targetPlayer.getRotation() - rotation);
+        x += moveRatio * (targetPos.getX() - getCenterX());
+        y += moveRatio * (targetPos.getY() - getCenterY());
+
+        if(Math.abs(targetRotation - rotation) < Math.abs(rotation - targetRotation)) {
+            rotation += moveRatio * (targetRotation - rotation);
         } else {
-            rotation -= moveRatio * (rotation - targetPlayer.getRotation());
+            rotation -= moveRatio * (rotation - targetRotation);
         }
 
 //        int zoom = 0;
