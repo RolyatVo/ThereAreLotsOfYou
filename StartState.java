@@ -17,7 +17,7 @@ import java.util.Random;
 
 public class StartState extends BasicGameState {
 
-  SpriteStack box;
+  SpriteStack playerSprite;
   Player player;
   SpriteStack tree;
   Camera cam = new Camera(960, 540);
@@ -35,10 +35,11 @@ public class StartState extends BasicGameState {
 
   @Override
   public void init(GameContainer container, StateBasedGame game) throws SlickException {
-    box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
+    //box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
     tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
+    playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 64, 64, cam);
 
-    player = new Player(box, posX, posY, 16, 16);
+    player = new Player(playerSprite, posX, posY, 16, 16);
     cam.setScale(3);
     serverConnect();
   }
