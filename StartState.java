@@ -1,5 +1,6 @@
 package lotsofyou;
 
+import jig.Vector;
 import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
@@ -17,19 +18,14 @@ import java.util.Random;
 public class StartState extends BasicGameState {
 
   SpriteStack box;
-  SpriteStack playerSprite;
-  UprightSprite grass;
-  SpriteStack tree;
   Player player;
-  Player[] enemies;
-  Camera cam = new Camera(960, 960);
+  SpriteStack tree;
+  Camera cam = new Camera(960, 540);
   int frame = 0;
-  float zoom = 5;
-
-  float x[] = new float[16];
-  float y[] = new float[16];
 
 
+  float posX = 960.0f / 2;
+  float posY = 540.0f / 2;
 
 
   @Override
@@ -41,11 +37,9 @@ public class StartState extends BasicGameState {
   public void init(GameContainer container, StateBasedGame game) throws SlickException {
     box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
     tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
-    grass = new UprightSprite(LotsOfYouGame.TEST_GRASS, cam);
-    playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 64, 64, cam);
-    player = new Player(playerSprite, cam.getX(), cam.getY(), cam);
 
-    cam.setScale(5);
+    player = new Player(box, posX, posY, 16, 16);
+    cam.setScale(3);
     serverConnect();
   }
 
@@ -53,11 +47,6 @@ public class StartState extends BasicGameState {
   @Override
   public void enter(GameContainer container, StateBasedGame game) {
 
-    Random rand = new Random();
-    for(int i = 0; i != 16; ++ i) {
-      x[i] = rand.nextInt(160);
-      y[i] = rand.nextInt(160);
-    }
   }
 
   @Override
@@ -67,43 +56,15 @@ public class StartState extends BasicGameState {
     ++frame;
 
 
-    float posX = 960.0f / 2;
-    float posY = 960.0f / 2;
-
-    for(int i = 0; i != 10; ++i) {
-      grass.draw(posX + x[i], posY + y[i]);
-    }
-
-    box.draw(posX, posY);
-    box.draw(posX, posY + 45);
-    player.render(cam.getCenterX(), cam.getCenterY());
     tree.draw(posX + 32, posY + 32);
-
-    int xDir = 0;
-    int yDir = 0;
-    if(Keyboard.isKeyDown(Keyboard.KEY_A)) --xDir;
-    if(Keyboard.isKeyDown(Keyboard.KEY_D)) ++xDir;
-    if(Keyboard.isKeyDown(Keyboard.KEY_W)) --yDir;
-    if(Keyboard.isKeyDown(Keyboard.KEY_S)) ++yDir;
-    if(Keyboard.isKeyDown(Keyboard.KEY_I)) zoom += (zoom > 8) ? 0 : 0.125f;
-    if(Keyboard.isKeyDown(Keyboard.KEY_O)) zoom -= (zoom < 1.25) ? 0 : 0.125f;
-
-    int rotDir = 0;
-    if(Keyboard.isKeyDown(Keyboard.KEY_J)) ++rotDir;
-    if(Keyboard.isKeyDown(Keyboard.KEY_K)) --rotDir;
-    cam.rotate(rotDir);
-    cam.setScale(zoom);
-
-    float rotation = cam.getRotation();
-    float transX = (float)Math.sin(Math.toRadians(rotation)) * yDir;
-    float transY = (float)Math.cos(Math.toRadians(rotation)) * yDir;
-
-    cam.move(transX, transY);
+    player.render();
   }
 
   @Override
   public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-
+    player.update(delta, container.getInput(), cam);
+    cam.setTargetPos(player.getX(), player.getY());
+    cam.update(container.getInput());
   }
 
 
