@@ -15,11 +15,11 @@ public class Player {
     SpriteStack playerSprite;
     Camera cam;
 
-    public Player(SpriteStack sprite, float x, float y) {
+    public Player(SpriteStack sprite, float x, float y, Camera cam) {
         playerSprite = sprite;
         this.x = x;
         this.y = y;
-        cam = new Camera(960, 960);
+        this.cam = cam;
     }
 
     public float getX() {
@@ -39,4 +39,5 @@ public class Player {
     public void render() {
         playerSprite.draw(x ,y);
     }
+    public void render(float x, float y) { playerSprite.draw(x, y);}
 }

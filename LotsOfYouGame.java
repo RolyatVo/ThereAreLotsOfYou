@@ -52,6 +52,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String TEST_GRASS = "lotsofyou/resource/grass_2.png";
 	public static final String TEST_TREE = "lotsofyou/resource/tree.png";
 	public static final String TEST_TREE2 = "lotsofyou/resource/tree2.png";
+	public static final String PLAYER_TEST = "lotsofyou/resource/Player.png";
 
 	public final int ScreenWidth;
 	public final int ScreenHeight;
@@ -90,6 +91,7 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(TEST_GRASS);
 		ResourceManager.loadImage(TEST_TREE);
 		ResourceManager.loadImage(TEST_TREE2);
+		ResourceManager.loadImage(PLAYER_TEST);
 	}
 
 	public static void main(String[] args) {

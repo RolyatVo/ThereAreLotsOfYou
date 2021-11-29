@@ -17,9 +17,11 @@ import java.util.Random;
 public class StartState extends BasicGameState {
 
   SpriteStack box;
-  SpriteStack otherPlayers;
+  SpriteStack playerSprite;
   UprightSprite grass;
   SpriteStack tree;
+  Player player;
+  Player[] enemies;
   Camera cam = new Camera(960, 960);
   int frame = 0;
   float zoom = 5;
@@ -37,11 +39,11 @@ public class StartState extends BasicGameState {
 
   @Override
   public void init(GameContainer container, StateBasedGame game) throws SlickException {
-   // otherPlayers = new ArrayList<>();
     box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
     tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
     grass = new UprightSprite(LotsOfYouGame.TEST_GRASS, cam);
-    otherPlayers = new SpriteStack(LotsOfYouGame.TEST_TREE2, 40, 40, cam);
+    playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 64, 64, cam);
+    player = new Player(playerSprite, cam.getX(), cam.getY(), cam);
 
     cam.setScale(5);
     serverConnect();
@@ -74,7 +76,7 @@ public class StartState extends BasicGameState {
 
     box.draw(posX, posY);
     box.draw(posX, posY + 45);
-    otherPlayers.draw(0,0);
+    player.render(cam.getCenterX(), cam.getCenterY());
     tree.draw(posX + 32, posY + 32);
 
     int xDir = 0;
@@ -83,8 +85,8 @@ public class StartState extends BasicGameState {
     if(Keyboard.isKeyDown(Keyboard.KEY_D)) ++xDir;
     if(Keyboard.isKeyDown(Keyboard.KEY_W)) --yDir;
     if(Keyboard.isKeyDown(Keyboard.KEY_S)) ++yDir;
-    if(Keyboard.isKeyDown(Keyboard.KEY_I)) zoom += (zoom > 8) ? 0 : 0.25f;
-    if(Keyboard.isKeyDown(Keyboard.KEY_O)) zoom -= (zoom < 1.25) ? 0 : 0.25f;
+    if(Keyboard.isKeyDown(Keyboard.KEY_I)) zoom += (zoom > 8) ? 0 : 0.125f;
+    if(Keyboard.isKeyDown(Keyboard.KEY_O)) zoom -= (zoom < 1.25) ? 0 : 0.125f;
 
     int rotDir = 0;
     if(Keyboard.isKeyDown(Keyboard.KEY_J)) ++rotDir;
@@ -137,6 +139,16 @@ public class StartState extends BasicGameState {
 
     }
     public void run() {
+//      try {
+//        while(true) {
+//          for(int i =0; i < enemies.length; i++) {
+//          }
+//
+//        }
+//
+//      } catch (IOException ex) {
+//          ex.printStackTrace();
+//      }
 
     }
   }
@@ -150,13 +162,22 @@ public class StartState extends BasicGameState {
 
     }
     public void run() {
-//      try {
-//        while(true) {
-//
-//        }
-//      } catch (IOException ex) {
-//        ex.printStackTrace();
-//      }
+      try {
+        while(true) {
+          dataOUT.writeFloat(player.getX());
+          dataOUT.writeFloat(player.getY());
+          dataOUT.flush();
+          try {
+            Thread.sleep(25);
+
+          } catch (InterruptedException ex) {
+            ex.fillInStackTrace();
+          }
+
+        }
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
     }
   }
 }

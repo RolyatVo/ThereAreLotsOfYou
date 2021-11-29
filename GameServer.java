@@ -1,5 +1,7 @@
 package lotsofyou;
 
+import jig.Vector;
+
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -14,12 +16,14 @@ public class GameServer {
     private ArrayList<ReadClient> playersReadRunnable;
     private ArrayList<WriteClient> playersWriteRunnable;
 
+    private Vector[] playerCoords;
+
     public GameServer () {
         System.out.println("Starting Server");
         playerSockets = new ArrayList<>();
         playersReadRunnable = new ArrayList<>();
         playersWriteRunnable = new ArrayList<>();
-
+        playerCoords = new Vector[10];
         playerCount = 0;
         playerCountMax = 10;
 
@@ -51,6 +55,7 @@ public class GameServer {
                 playerSockets.add(server);
                 playersWriteRunnable.add(wc);
                 playersReadRunnable.add(rc);
+                Thread readThreadplayers = new Thread(playersReadRunnable.get(playersReadRunnable.size()-1));
 
              }
 
@@ -71,7 +76,15 @@ public class GameServer {
 
         @Override
         public void run() {
+            try {
+                while(true) {
+                    playerCoords[playerID].setX(dataIN.readFloat());
+                    playerCoords[playerID].setY(dataIN.readFloat());
+                }
 
+            } catch(IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
     private class WriteClient implements Runnable {
@@ -86,7 +99,26 @@ public class GameServer {
 
         @Override
         public void run() {
+            try {
+                while(true) {
+                    for(int i =0; i < playerCoords.length; i++ ) {
+                        if(i != playerID) {
+                            dataOUT.writeInt(i);
+                            dataOUT.writeFloat(playerCoords[i].getX());
+                            dataOUT.writeFloat(playerCoords[i].getY());
+                        }
 
+                    }
+                    try {
+                        Thread.sleep(25);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+
+                }
+            } catch ( IOException ex ) {
+                ex.printStackTrace();
+            }
         }
     }
 
