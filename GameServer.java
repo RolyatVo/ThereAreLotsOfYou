@@ -55,7 +55,13 @@ public class GameServer {
                 playerSockets.add(server);
                 playersWriteRunnable.add(wc);
                 playersReadRunnable.add(rc);
-                Thread readThreadplayers = new Thread(playersReadRunnable.get(playersReadRunnable.size()-1));
+
+                Thread readClients = new Thread(playersReadRunnable.get(playersReadRunnable.size()-1));
+
+                Thread writeClients = new Thread(playersWriteRunnable.get(playersWriteRunnable.size()-1));
+
+                readClients.start();
+                writeClients.start();
 
              }
 
@@ -78,12 +84,32 @@ public class GameServer {
         public void run() {
             try {
                 while(true) {
-                    playerCoords[playerID].setX(dataIN.readFloat());
-                    playerCoords[playerID].setY(dataIN.readFloat());
+                    float x, y;
+                    if(playerCoords[playerID] != null) {
+                        x = dataIN.readFloat();
+                        y = dataIN.readFloat();
+
+                        playerCoords[playerID] = new Vector(x, y);
+
+
+                        //System.out.println("X: " + x + " Y: " + y);
+                       // System.out.println("Player " + playerID + ": X: " + playerCoords[playerID].getX() + " Y: " + playerCoords[playerID].getY());
+                    }
+                    else {
+                        x = dataIN.readFloat();
+                        y = dataIN.readFloat();
+                        playerCoords[playerID] = new Vector(x, y);
+                      //  System.out.println("New Player " + playerID + ": X: " + playerCoords[playerID].getX() + " Y: " + playerCoords[playerID].getY());
+
+                    }
                 }
 
             } catch(IOException ex) {
-                ex.printStackTrace();
+//                ex.printStackTrace();
+                playerCoords[playerID] = null;
+                System.out.println("Socket closed for player " + playerID);
+                playerCount--;
+
             }
         }
     }
@@ -96,25 +122,24 @@ public class GameServer {
             System.out.println("Write: " + playerID + " Runnable created");
         }
 
-
         @Override
         public void run() {
             try {
                 while(true) {
                     for(int i =0; i < playerCoords.length; i++ ) {
-                        if(i != playerID) {
+                        if(i != playerID && playerCoords[i] != null) {
                             dataOUT.writeInt(i);
                             dataOUT.writeFloat(playerCoords[i].getX());
                             dataOUT.writeFloat(playerCoords[i].getY());
+                            System.out.println("X: " + playerCoords[i].getX() + " Y: " + playerCoords[i].getY());
+                            dataOUT.flush();
                         }
-
                     }
                     try {
                         Thread.sleep(25);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
-
                 }
             } catch ( IOException ex ) {
                 ex.printStackTrace();

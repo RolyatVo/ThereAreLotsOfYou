@@ -19,6 +19,7 @@ public class StartState extends BasicGameState {
 
   SpriteStack playerSprite;
   Player player;
+  Player enemyPlayer;
   SpriteStack tree;
   Camera cam = new Camera(960, 540);
   int frame = 0;
@@ -38,6 +39,7 @@ public class StartState extends BasicGameState {
     //box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
     tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
     playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 64, 64, cam);
+    enemyPlayer = new Player(playerSprite, posX, posY, 16, 16);
 
     player = new Player(playerSprite, posX, posY, 16, 16);
     cam.setScale(3);
@@ -59,6 +61,8 @@ public class StartState extends BasicGameState {
 
     tree.draw(posX + 32, posY + 32);
     player.render();
+    if(playerCoords[enemyID] != null)
+      enemyPlayer.render(playerCoords[enemyID].getX(), playerCoords[enemyID].getY());
   }
 
   @Override
@@ -71,6 +75,8 @@ public class StartState extends BasicGameState {
 
   private Socket socket;
   private int playerID;
+  private int enemyID;
+  private Vector[] playerCoords = new Vector[10];
   private ReadServer rsRunnable;
   private WriteServer wsRunnable;
 
@@ -80,11 +86,18 @@ public class StartState extends BasicGameState {
       DataInputStream in = new DataInputStream(socket.getInputStream());
       DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
+
       playerID = in.readInt();
       System.out.println("You are player #" + playerID);
 
       rsRunnable = new ReadServer(in);
       wsRunnable = new WriteServer(out);
+
+      Thread readServer = new Thread(rsRunnable);
+      Thread writeServer = new Thread(wsRunnable);
+
+      readServer.start();
+      writeServer.start();
 
     } catch (IOException ex) {
       ex.printStackTrace();
@@ -101,16 +114,19 @@ public class StartState extends BasicGameState {
 
     }
     public void run() {
-//      try {
-//        while(true) {
-//          for(int i =0; i < enemies.length; i++) {
-//          }
-//
-//        }
-//
-//      } catch (IOException ex) {
-//          ex.printStackTrace();
-//      }
+      try {
+        while(true) {
+          enemyID = dataIN.readInt();
+          float xpos = dataIN.readFloat();
+          float ypos = dataIN.readFloat();
+          playerCoords[enemyID] = new Vector(xpos, ypos);
+
+          System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
+        }
+
+      } catch (IOException ex) {
+          ex.printStackTrace();
+      }
 
     }
   }
@@ -121,7 +137,6 @@ public class StartState extends BasicGameState {
       dataOUT = out;
       System.out.println("Write to Server runnable created!!");
 
-
     }
     public void run() {
       try {
@@ -129,6 +144,7 @@ public class StartState extends BasicGameState {
           dataOUT.writeFloat(player.getX());
           dataOUT.writeFloat(player.getY());
           dataOUT.flush();
+//          System.out.println("X: " + player.getX() +" Y: " + player.getY());
           try {
             Thread.sleep(25);
 
