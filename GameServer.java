@@ -16,14 +16,14 @@ public class GameServer {
     private ArrayList<ReadClient> playersReadRunnable;
     private ArrayList<WriteClient> playersWriteRunnable;
 
-    private Vector[] playerCoords;
+    private ArrayList<Player> players;
 
     public GameServer () {
         System.out.println("Starting Server");
         playerSockets = new ArrayList<>();
         playersReadRunnable = new ArrayList<>();
         playersWriteRunnable = new ArrayList<>();
-        playerCoords = new Vector[10];
+        players = new ArrayList<>();
         playerCount = 0;
         playerCountMax = 10;
 
@@ -85,28 +85,25 @@ public class GameServer {
             try {
                 while(true) {
                     float x, y;
-                    if(playerCoords[playerID] != null) {
-                        x = dataIN.readFloat();
-                        y = dataIN.readFloat();
+                    Player current = getPlayer(playerID);
+                    x = dataIN.readFloat();
+                    y = dataIN.readFloat();
+                    if(current != null) {
 
-                        playerCoords[playerID] = new Vector(x, y);
-
-
+                        current.setX(x);
+                        current.setY(y);
                         //System.out.println("X: " + x + " Y: " + y);
                        // System.out.println("Player " + playerID + ": X: " + playerCoords[playerID].getX() + " Y: " + playerCoords[playerID].getY());
                     }
                     else {
-                        x = dataIN.readFloat();
-                        y = dataIN.readFloat();
-                        playerCoords[playerID] = new Vector(x, y);
+                        players.add( new Player(x,y, playerID));
                       //  System.out.println("New Player " + playerID + ": X: " + playerCoords[playerID].getX() + " Y: " + playerCoords[playerID].getY());
-
                     }
                 }
 
             } catch(IOException ex) {
 //                ex.printStackTrace();
-                playerCoords[playerID] = null;
+                players.remove(getPlayer(playerID));
                 System.out.println("Socket closed for player " + playerID);
                 playerCount--;
 
@@ -126,12 +123,23 @@ public class GameServer {
         public void run() {
             try {
                 while(true) {
-                    for(int i =0; i < playerCoords.length; i++ ) {
-                        if(i != playerID && playerCoords[i] != null) {
-                            dataOUT.writeInt(i);
-                            dataOUT.writeFloat(playerCoords[i].getX());
-                            dataOUT.writeFloat(playerCoords[i].getY());
-                            System.out.println("X: " + playerCoords[i].getX() + " Y: " + playerCoords[i].getY());
+                    Player cur = getPlayer(playerID);
+//                    for(int i =0; i < players.size(); i++ ) {
+//                        if(i != playerID && cur != null) {
+//                            dataOUT.writeInt(i);
+//                            dataOUT.writeFloat(cur.getX());
+//                            dataOUT.writeFloat(cur.getY());
+//                            System.out.println("X: " + cur.getX() + " Y: " + cur.getY());
+//                            dataOUT.flush();
+//                        }
+//                    }
+
+                    for(Player p: players) {
+                        if(p != cur && cur != null) {
+                            dataOUT.writeInt(p.getID());
+                            dataOUT.writeFloat(p.getX());
+                            System.out.println("Player: " + p.getID() + " X: " + cur.getX() + " Y: " + cur.getY());
+                            dataOUT.writeFloat(p.getY());
                             dataOUT.flush();
                         }
                     }
@@ -146,6 +154,15 @@ public class GameServer {
             }
         }
     }
+
+    private Player getPlayer(int id) {
+        for(Player p : players) {
+            if (p.getID() == id)
+                return p;
+        }
+        return null;
+    }
+
 
     public static void main(String[] args) {
         GameServer gs = new GameServer();

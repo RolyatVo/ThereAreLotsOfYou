@@ -20,6 +20,8 @@ public class Player {
 
     private float rotation;
 
+    private int keyPress;
+    private int ID;
 
     SpriteStack playerSprite;
 
@@ -30,17 +32,25 @@ public class Player {
         this.width = width;
         this.height = height;
         this.rotation = 0;
+        keyPress = -1;
+        ID = -99;
+    }
+
+    public Player(float x, float y, int id) {
+        this.x = x;
+        this.y = y;
+        ID = id;
     }
 
     void update(float delta, Input in, Camera cam) {
         float deltaSeconds = delta / 1000;
-
+        keyPress = -1;
         int xDir = 0;
         int yDir = 0;
-        if(in.isKeyDown(Keyboard.KEY_A)) --xDir;
-        if(in.isKeyDown(Keyboard.KEY_D)) ++xDir;
-        if(in.isKeyDown(Keyboard.KEY_W)) --yDir;
-        if(in.isKeyDown(Keyboard.KEY_S)) ++yDir;
+        if(in.isKeyDown(Keyboard.KEY_A)) { --xDir; keyPress = Keyboard.KEY_A; }
+        if(in.isKeyDown(Keyboard.KEY_D)) { ++xDir; keyPress = Keyboard.KEY_D; }
+        if(in.isKeyDown(Keyboard.KEY_W)) { --yDir; keyPress = Keyboard.KEY_W; }
+        if(in.isKeyDown(Keyboard.KEY_S)) { ++yDir; keyPress = Keyboard.KEY_S; }
 
         float transX = (float)Math.sin(Math.toRadians(cam.getRotation())) * (yDir * moveSpeed * deltaSeconds);
         float transY = (float)Math.cos(Math.toRadians(cam.getRotation())) * (yDir * moveSpeed * deltaSeconds);
@@ -63,10 +73,11 @@ public class Player {
     public float getRotation() {
         return this.rotation;
     }
-
     public void setRotation(float rotation) {
         this.rotation = rotation;
     }
+
+    public int getKeyPress() { return this.keyPress; }
 
     public float getX() {
         return x;
@@ -75,12 +86,13 @@ public class Player {
         this.x = x;
     }
 
-    public float getY() {
-        return y;
-    }
+    public float getY() { return y; }
     public void setY(float y) {
         this.y = y;
     }
+
+    public void setID(int id) { this.ID = id; }
+    public int getID() { return this.ID; }
 
     public void render() {
         playerSprite.draw(x - width / 2 ,y - height / 2);
