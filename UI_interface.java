@@ -11,24 +11,29 @@ public class UI_interface {
 
     private healthBar healthBar;
     private armorSection armorSection;
+    private weaponSection weaponSection;
 
     public UI_interface(Player player, int screenWidth, int screenHeight) {
-        this.bottomRow = screenHeight * 0.9f;
+        this.bottomRow = screenHeight * 0.9f - 15;
         this.left = 20;
 
 
         healthBar = new healthBar(player.getHealthNUM(), 250, 30);
         armorSection = new armorSection(200, 30);
+        weaponSection = new weaponSection();
     }
 
     public void render(Graphics g) {
         this.healthBar.render(left, bottomRow, g);
-        this.armorSection.render(960 * 0.85f, bottomRow, g);
+
+        this.weaponSection.render(960 * 0.68f, bottomRow, g);
+        this.armorSection.render(960 * 0.75f, bottomRow, g);
     }
 
     public void update(Player player) {
         healthBar.update(player.getHealthNUM());
         armorSection.update(3);
+        weaponSection.update(true);
     }
 }
 

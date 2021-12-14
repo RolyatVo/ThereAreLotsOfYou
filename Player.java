@@ -26,6 +26,7 @@ public class Player {
     SpriteStack playerSprite;
 
     private int healthNUM = 100;
+    private int armorPlates = 0;
 
     public Player(SpriteStack sprite, float x, float y, float width, float height) {
         playerSprite = sprite;
@@ -100,8 +101,13 @@ public class Player {
     public void setHealthNUM(int health) { this.healthNUM = health; }
     public int getHealthNUM() { return this.healthNUM; }
 
+    public void setArmorPlates(int plates) { this.armorPlates = plates; }
+    public int getArmorPlates() { return this.armorPlates; }
+
     public void render() {
         playerSprite.draw(x - width / 2 ,y - height / 2);
     }
     public void render(float x, float y) { playerSprite.draw(x, y);}
+
+
 }
