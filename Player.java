@@ -25,6 +25,8 @@ public class Player {
 
     SpriteStack playerSprite;
 
+    private int healthNUM = 100;
+
     public Player(SpriteStack sprite, float x, float y, float width, float height) {
         playerSprite = sprite;
         this.x = x;
@@ -40,6 +42,7 @@ public class Player {
         this.x = x;
         this.y = y;
         ID = id;
+
     }
 
     void update(float delta, Input in, Camera cam) {
@@ -93,6 +96,9 @@ public class Player {
 
     public void setID(int id) { this.ID = id; }
     public int getID() { return this.ID; }
+
+    public void setHealthNUM(int health) { this.healthNUM = health; }
+    public int getHealthNUM() { return this.healthNUM; }
 
     public void render() {
         playerSprite.draw(x - width / 2 ,y - height / 2);

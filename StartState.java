@@ -17,6 +17,7 @@ import java.util.Random;
 
 public class StartState extends BasicGameState {
 
+    UI_interface ui;
     SpriteStack playerSprite;
     Player player;
     ArrayList<Player> players;
@@ -43,6 +44,7 @@ public class StartState extends BasicGameState {
         players = new ArrayList<>();
 
         player = new Player(playerSprite, posX, posY, 16, 16);
+        ui = new UI_interface(player, 960, 540);
         cam.setScale(3);
         serverConnect();
     }
@@ -67,6 +69,7 @@ public class StartState extends BasicGameState {
 
 
         players.forEach(p -> p.render(p.getX(), p.getY()));
+        ui.render(g);
 
     }
 
@@ -75,6 +78,7 @@ public class StartState extends BasicGameState {
         player.update(delta, container.getInput(), cam);
         cam.setTargetPos(player.getX(), player.getY());
         cam.update(container.getInput());
+        ui.update(player);
     }
 
     private Player getPlayer(int id) {
