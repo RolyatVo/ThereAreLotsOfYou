@@ -1,5 +1,4 @@
 package lotsofyou.UI;
-import lotsofyou.Player;
 import org.newdawn.slick.*;
 
 
