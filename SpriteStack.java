@@ -39,9 +39,14 @@ public class SpriteStack extends SpriteSheet {
 
     @Override
     public void draw(float x, float y) {
+
+
         Vector corners[] = new Vector[4];
         for(int i = 0; i != 4; ++i) {
-            corners[i] = new Vector(x + ((i % 2) * width), y + ((i / 2) * height));
+            Vector centerOffset = new Vector((i % 2) * width - (float)width / 2,
+                                             (i / 2) * height - (float)height / 2);
+
+            corners[i] = centerOffset.rotate(getRotation()).add(new Vector((float)width / 2, (height) / 2)).add(new Vector(x, y));
         }
 
         double cs = Math.cos(Math.toRadians(renderCam.getRotation()));

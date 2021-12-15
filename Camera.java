@@ -1,6 +1,8 @@
 package lotsofyou;
 
 import jig.Vector;
+import org.lwjgl.input.Keyboard;
+import org.newdawn.slick.Input;
 
 public class Camera {
     private float x;
@@ -11,6 +13,12 @@ public class Camera {
 
     private float scale;
     private float rotation;
+    private float targetRotation;
+    private Vector targetPos;
+
+    private final float rotationAmount = 30.0f;
+
+    private final float moveRatio = 0.08f;
 
     public Camera(float width_, float height_) {
         this(0, 0, width_, height_);
@@ -27,6 +35,8 @@ public class Camera {
         this.height = height_;
         this.scale = scale_;
         this.rotation = rotation_;
+        this.targetRotation = 0;
+        this.targetPos = new Vector(x, y);
     }
 
     public Vector getPos() {
@@ -90,11 +100,51 @@ public class Camera {
         this.y += y;
     }
 
-    public void setRotation(float rotation) {
-        this.rotation = rotation;
+    public void setTargetRotation(float targetRotation) { this.targetRotation = targetRotation; }
+
+    public void setTargetPos(float x, float y) {
+        this.targetPos = new Vector(x, y);
     }
 
     public void rotate(float angle) {
         this.rotation += angle;
+    }
+
+    public void update(Input in) {
+        if(in.isKeyPressed(Keyboard.KEY_Q)) {
+            targetRotation += rotationAmount;
+        } else if (in.isKeyPressed(Keyboard.KEY_E)) {
+            targetRotation -= rotationAmount;
+        }
+
+        x += moveRatio * (targetPos.getX() - getCenterX());
+        y += moveRatio * (targetPos.getY() - getCenterY());
+
+        if(Math.abs(targetRotation - rotation) < Math.abs(rotation - targetRotation)) {
+            rotation += moveRatio * (targetRotation - rotation);
+        } else {
+            rotation -= moveRatio * (rotation - targetRotation);
+        }
+
+//        int zoom = 0;
+//        if(in.isKeyDown(Keyboard.KEY_N)) --zoom;
+//        if(in.isKeyDown(Keyboard.KEY_M)) ++zoom;
+//        scale += (float)zoom * 0.2f;
+
+//        int rotDir = 0;
+//        if(in.isKeyDown(Keyboard.KEY_J)) ++rotDir;
+//        if(in.isKeyDown(Keyboard.KEY_K)) --rotDir;
+//        rotation += (float) rotDir * 0.5f;
+    }
+
+    public Vector screenToWorld(float x, float y) {
+        double cs = Math.cos(Math.toRadians(-rotation));
+        double sn = Math.sin(Math.toRadians(-rotation));
+
+        float newCenterOffsetX = x - (width / 2);
+        float newCenterOffsetY = y - (height / 2);
+        float oldCenterOffsetX = (float)(newCenterOffsetX * cs - newCenterOffsetY * sn) / scale;
+        float oldCenterOffsetY = (float)(newCenterOffsetX * sn + newCenterOffsetY * cs) / scale;
+        return new Vector(oldCenterOffsetX + (width / 2) + this.x, oldCenterOffsetY + (height / 2) + this.y);
     }
 }
