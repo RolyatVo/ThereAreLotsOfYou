@@ -52,7 +52,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String TEST_GRASS = "lotsofyou/resource/grass_2.png";
 	public static final String TEST_TREE = "lotsofyou/resource/tree.png";
 	public static final String TEST_TREE2 = "lotsofyou/resource/tree2.png";
-	public static final String PLAYER_TEST = "lotsofyou/resource/Player.png";
+	public static final String PLAYER_TEST = "lotsofyou/resource/player_1.png";
 	public static final String ARMOR_RSC = "lotsofyou/resource/shield.png";
 	public static final String SWORD_RSC = "lotsofyou/resource/sword.png";
 

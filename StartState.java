@@ -39,11 +39,11 @@ public class StartState extends BasicGameState {
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
         //box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
         tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
-        playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 64, 64, cam);
+        playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
 
         players = new ArrayList<>();
 
-        player = new Player(playerSprite, posX, posY, 16, 16);
+        player = new Player(playerSprite, posX, posY, 6, 3);
         ui = new UI_interface(player, 960, 540);
         cam.setScale(3);
         serverConnect();
@@ -77,7 +77,7 @@ public class StartState extends BasicGameState {
     public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
         player.update(delta, container.getInput(), cam);
         cam.setTargetPos(player.getX(), player.getY());
-        cam.update(container.getInput());
+        cam.update(container.getInput(), player);
         ui.update(player);
     }
 

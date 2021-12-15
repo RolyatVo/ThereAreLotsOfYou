@@ -43,8 +43,8 @@ public class SpriteStack extends SpriteSheet {
 
         Vector corners[] = new Vector[4];
         for(int i = 0; i != 4; ++i) {
-            Vector centerOffset = new Vector((i % 2) * width - (float)width / 2,
-                                             (i / 2) * height - (float)height / 2);
+            Vector centerOffset = new Vector((i % 2) * height - (float)height / 2,
+                                             (i / 2) * width - (float)width / 2);
 
             corners[i] = centerOffset.rotate(getRotation()).add(new Vector((float)width / 2, (height) / 2)).add(new Vector(x, y));
         }
