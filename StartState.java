@@ -19,6 +19,7 @@ public class StartState extends BasicGameState {
 
     UI_interface ui;
     SpriteStack playerSprite;
+    PlayerInput playerInput;
     Player player;
     ArrayList<Player> players;
     SpriteStack tree;
@@ -45,6 +46,7 @@ public class StartState extends BasicGameState {
 
         player = new Player(playerSprite, posX, posY, 6, 3);
         ui = new UI_interface(player, 960, 540);
+        playerInput = new PlayerInput();
         cam.setScale(3);
         serverConnect();
     }
@@ -75,7 +77,9 @@ public class StartState extends BasicGameState {
 
     @Override
     public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-        player.update(delta, container.getInput(), cam);
+        playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
+        player.setPlayerInput(playerInput);
+        player.update(delta, cam);
         cam.setTargetPos(player.getX(), player.getY());
         cam.update(container.getInput(), player);
         ui.update(player);
@@ -103,7 +107,7 @@ public class StartState extends BasicGameState {
             System.out.println("You are player #" + playerID);
 
             rsRunnable = new ReadServer(in);
-            wsRunnable = new WriteServer(out);
+            wsRunnable = new WriteServer(out, playerInput);
 
             Thread readServer = new Thread(rsRunnable);
             Thread writeServer = new Thread(wsRunnable);
@@ -158,30 +162,21 @@ public class StartState extends BasicGameState {
     }
     private class WriteServer implements Runnable {
         private DataOutputStream dataOUT;
+        private PlayerInput input;
 
-        public WriteServer (DataOutputStream out) {
+        public WriteServer (DataOutputStream out, PlayerInput input) {
             dataOUT = out;
+            this.input = input;
             System.out.println("Write to Server runnable created!!");
 
         }
         public void run() {
             try {
                 while(true) {
-                    //TODO Maybe try to get client send a command or response so that server knows what to do
-                    dataOUT.writeFloat(player.getX());
-                    dataOUT.writeFloat(player.getY());
-                    dataOUT.flush();
-                    if (player.getKeyPress() != -1) {
-                        System.out.println("Player Pressed: " + player.getKeyPress());
+                    if(input.isUpdated()) {
+                        dataOUT.writeInt(LotsOfYouGame.INPUT_PACKET);
+                        input.send(dataOUT);
                     }
-//          System.out.println("X: " + player.getX() +" Y: " + player.getY());
-                    try {
-                        Thread.sleep(25);
-
-                    } catch (InterruptedException ex) {
-                        ex.fillInStackTrace();
-                    }
-
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();

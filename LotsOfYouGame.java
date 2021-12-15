@@ -59,6 +59,8 @@ public class LotsOfYouGame extends StateBasedGame {
 	public final int ScreenWidth;
 	public final int ScreenHeight;
 
+	public static final int INPUT_PACKET = 0;
+
 	/**
 	 * Create the BounceGame frame, saving the width and height for later use.
 	 *
