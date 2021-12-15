@@ -56,6 +56,18 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String ARMOR_RSC = "lotsofyou/resource/shield.png";
 	public static final String SWORD_RSC = "lotsofyou/resource/sword.png";
 
+	public static final String WALKING_RSC_1 = "lotsofyou/resource/Animations/Walking/player_1_FRAME0.png";
+	public static final String WALKING_RSC_2 = "lotsofyou/resource/Animations/Walking/player_1_FRAME1.png";
+	public static final String WALKING_RSC_3 = "lotsofyou/resource/Animations/Walking/player_1_FRAME2.png";
+	public static final String WALKING_RSC_4 = "lotsofyou/resource/Animations/Walking/player_1_FRAME3.png";
+	public static final String WALKING_RSC_5 = "lotsofyou/resource/Animations/Walking/player_1_FRAME4.png";
+	public static final String WALKING_RSC_6 = "lotsofyou/resource/Animations/Walking/player_1_FRAME5.png";
+
+
+
+
+
+
 	public final int ScreenWidth;
 	public final int ScreenHeight;
 
@@ -96,6 +108,17 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(PLAYER_TEST);
 		ResourceManager.loadImage(ARMOR_RSC);
 		ResourceManager.loadImage(SWORD_RSC);
+
+
+		ResourceManager.loadImage(WALKING_RSC_1);
+		ResourceManager.loadImage(WALKING_RSC_2);
+		ResourceManager.loadImage(WALKING_RSC_3);
+		ResourceManager.loadImage(WALKING_RSC_4);
+		ResourceManager.loadImage(WALKING_RSC_5);
+		ResourceManager.loadImage(WALKING_RSC_6);
+
+
+
 	}
 
 	public static void main(String[] args) {

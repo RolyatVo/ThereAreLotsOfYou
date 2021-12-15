@@ -19,6 +19,7 @@ public class StartState extends BasicGameState {
 
     UI_interface ui;
     SpriteStack playerSprite;
+    SpriteStackAnimation playerAnimated;
     Player player;
     ArrayList<Player> players;
     SpriteStack tree;
@@ -39,11 +40,26 @@ public class StartState extends BasicGameState {
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
         //box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
         tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
+
         playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
+
+
+        SpriteStack[] frames = new SpriteStack[7];
+
+        frames[0] = new SpriteStack(LotsOfYouGame.WALKING_RSC_1, 6, 7, cam);
+        frames[1] = new SpriteStack(LotsOfYouGame.WALKING_RSC_2, 6, 7, cam);
+        frames[2] = new SpriteStack(LotsOfYouGame.WALKING_RSC_3, 6, 7, cam);
+        frames[3] = new SpriteStack(LotsOfYouGame.WALKING_RSC_4, 6, 7, cam);
+        frames[4] = new SpriteStack(LotsOfYouGame.WALKING_RSC_5, 6, 7, cam);
+        frames[5] = new SpriteStack(LotsOfYouGame.WALKING_RSC_6, 6, 7, cam);
+
+
+
+        playerAnimated = new SpriteStackAnimation(frames, 150);
 
         players = new ArrayList<>();
 
-        player = new Player(playerSprite, posX, posY, 6, 3);
+        player = new Player(playerAnimated, posX, posY, 6, 3);
         ui = new UI_interface(player, 960, 540);
         cam.setScale(3);
         serverConnect();

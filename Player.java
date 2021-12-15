@@ -32,8 +32,9 @@ public class Player {
     private int ID;
 
     SpriteStack playerSprite;
+    SpriteStackAnimation playerAnimation;
 
-    private int healthNUM = 100;
+    private int healthNUM = 50;
     private int armorPlates = 0;
 
     private final float rotationAmount = 30.0f;
@@ -70,6 +71,23 @@ public class Player {
         ID = -99;
         state = State.FREE;
     }
+    public Player(SpriteStackAnimation sprite, float x, float y, float width, float height) {
+        playerAnimation = sprite;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.lookRotation = 0;
+        this.moveRotation = 0;
+        this.targetMoveRotation = 0;
+        this.actionTime = 0;
+        this.rollDir = new Vector(0, 0);
+        keyPress = -1;
+        ID = -99;
+        state = State.FREE;
+    }
+
+
 
     public Player(float x, float y, int id) {
         this.x = x;
@@ -80,6 +98,8 @@ public class Player {
 
     void update(float delta, Input in, Camera cam) {
         float deltaSeconds = delta / 1000;
+
+        playerAnimation.update((int) delta);
 
         switch (state) {
             case FREE -> free(deltaSeconds, in, cam);
@@ -193,10 +213,9 @@ public class Player {
     public void setArmorPlates(int plates) { this.armorPlates = plates; }
     public int getArmorPlates() { return this.armorPlates; }
 
-    public void render() {
-        playerSprite.draw(x - width / 2 ,y - height / 2);
+    public void render() { playerAnimation.draw(x - width / 2 ,y - height / 2);
     }
-    public void render(float x, float y) { playerSprite.draw(x, y);}
+    public void render(float x, float y) { playerAnimation.draw(x, y);}
 
     public float getMoveRotation() {
         return this.moveRotation;
