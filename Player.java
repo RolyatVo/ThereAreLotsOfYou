@@ -87,9 +87,10 @@ public class Player {
         this.targetMoveRotation = 0;
         this.actionTime = 0;
         this.rollDir = new Vector(0, 0);
+        this.input = new PlayerInput();
+        this.state = State.FREE;
         keyPress = -1;
         ID = -99;
-        state = State.FREE;
     }
 
 
@@ -114,7 +115,6 @@ public class Player {
     void update(float delta) {
         float deltaSeconds = delta / 1000;
 
-        playerAnimation.update((int) delta);
 
         switch (state) {
             case FREE -> free(deltaSeconds);
@@ -158,6 +158,7 @@ public class Player {
         y += transY;
 
         if(playerSprite != null) playerSprite.setRotation(input.lookRotation);
+        if(playerAnimation != null) playerAnimation.setRotation(input.lookRotation);
 
         if(input.attack) {
             actionTime = 0;

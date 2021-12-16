@@ -95,6 +95,14 @@ public class StartState extends BasicGameState {
             playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
             ui.update(player);
 
+            if(playerInput.down || playerInput.up || playerInput.left || playerInput.right) {
+                player.playerAnimation.play();
+                player.playerAnimation.update(delta);
+            }
+            else {
+                player.playerAnimation.stop();
+                player.playerAnimation.setFrame(0);
+            }
             cam.setTargetPos(player.getX(), player.getY());
             cam.update(container.getInput(), player);
         } else {
@@ -159,7 +167,7 @@ public class StartState extends BasicGameState {
                                 p.setPlayerState(st);
                             }
                             else {
-                                p = new Player(playerSprite, 0, 0, 6, 3);
+                                p = new Player(playerAnimated, 0, 0, 6, 7);
                                 p.setID(playerId);
                                 players.add(p);
                             }

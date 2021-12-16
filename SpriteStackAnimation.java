@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 public class SpriteStackAnimation extends Animation {
     private ArrayList<SSFrame> frames = new ArrayList<>();
+    boolean isPlaying;
+    float rotation;
 
 //    private Camera cam;
 
@@ -18,6 +20,8 @@ public class SpriteStackAnimation extends Animation {
     public SpriteStackAnimation(SpriteStack[] frames, int duration) {
         currentDuration = duration;
         currentFrame =0;
+        isPlaying = true;
+        rotation = 0;
 //        this.cam = cam;
 
 
@@ -33,28 +37,40 @@ public class SpriteStackAnimation extends Animation {
             getCurrentSSFrame().spritestack.draw(x , y);
 
     }
+    public void setFrame(int index) { this.currentFrame = index; }
+
+    public void stop() { this.isPlaying = false; }
+    public void play() { this.isPlaying = true; }
+
+    public void setRotation(float rotation) {
+        this.rotation = rotation;
+        frames.forEach(f -> f.spritestack.setRotation(this.rotation) );
+    }
 
     public void update(int delta)  {
 
-        if(this.currentDuration < 0 ) {
-            if(currentFrame < 6) {
-                this.currentFrame++;
-            }
-            if(currentFrame == 6) {
-                this.currentFrame = 0;
-            }
+        if(isPlaying) {
+            if (this.currentDuration < 0) {
+                if (currentFrame < 6) {
+                    this.currentFrame++;
+                }
+                if (currentFrame == 6) {
+                    this.currentFrame = 0;
+                }
                 this.currentDuration = getCurrentSSFrame().duration;
 
+            }
+            this.currentDuration -= delta;
         }
-        this.currentDuration -= delta;
-        System.out.println("Delta: " + delta);
-        System.out.println("Current Duration: " + currentDuration);
-        System.out.println("Cyrrent Frame: " + currentFrame);
+//        System.out.println("Delta: " + delta);
+//        System.out.println("Current Duration: " + currentDuration);
+//        System.out.println("Cyrrent Frame: " + currentFrame);
 
     }
 
 
-    public SSFrame getCurrentSSFrame() {
+
+    private SSFrame getCurrentSSFrame() {
         return frames.get(currentFrame);
     }
 
