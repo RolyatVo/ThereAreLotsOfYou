@@ -111,6 +111,6 @@ public class LotsOfYouGame extends StateBasedGame {
 			app.start();
 		} catch (Exception e) {
 			e.printStackTrace();
-    }
+    	}
 	}
 }

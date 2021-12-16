@@ -53,20 +53,21 @@ public class SpriteStack extends SpriteSheet {
         double sn = Math.sin(Math.toRadians(renderCam.getRotation()));
 
         for(int i = 0; i != 4; ++i) {
+            Vector halfRenderRes = renderCam.getRenderRes().scale(0.5f);
             Vector centerOffset = corners[i].subtract(new Vector(renderCam.getX(), renderCam.getY())).subtract(
-                    new Vector(renderCam.getWidth() / 2, renderCam.getHeight() / 2));
-            float newCenterOffsetX = (float)(centerOffset.getX() * cs - centerOffset.getY() * sn) * renderCam.getScale();
-            float newCenterOffsetY = (float)(centerOffset.getX() * sn + centerOffset.getY() * cs) * renderCam.getScale();
-            corners[i] = new Vector(newCenterOffsetX + renderCam.getWidth() / 2, newCenterOffsetY + renderCam.getHeight() / 2);
+                    halfRenderRes);
+            float newCenterOffsetX = (float)(centerOffset.getX() * cs - centerOffset.getY() * sn);
+            float newCenterOffsetY = (float)(centerOffset.getX() * sn + centerOffset.getY() * cs);
+            corners[i] = new Vector(newCenterOffsetX + halfRenderRes.getX(), newCenterOffsetY + halfRenderRes.getY());
         }
 
         int offset = 0;
         for(int i = imgArr.length - 1; i != -1; --i) {
             imgArr[i].drawWarped(
-                    corners[0].getX(), corners[0].getY() - (offset * renderCam.getScale()),
-                    corners[1].getX(), corners[1].getY() - (offset * renderCam.getScale()),
-                    corners[3].getX(), corners[3].getY() - (offset * renderCam.getScale()),
-                    corners[2].getX(), corners[2].getY() - (offset * renderCam.getScale())
+                    corners[0].getX() * renderCam.getScale(), (corners[0].getY() - offset) * renderCam.getScale(),
+                    corners[1].getX() * renderCam.getScale(), (corners[1].getY() - offset) * renderCam.getScale(),
+                    corners[3].getX() * renderCam.getScale(), (corners[3].getY() - offset) * renderCam.getScale(),
+                    corners[2].getX() * renderCam.getScale(), (corners[2].getY() - offset) * renderCam.getScale()
             );
             ++offset;
         }

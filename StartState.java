@@ -20,7 +20,7 @@ public class StartState extends BasicGameState {
     UI_interface ui;
     SpriteStack playerSprite;
     PlayerInput playerInput;
-    ArrayList<Player> players;
+    final PlayerManager playerManager = new PlayerManager();
     SpriteStack tree;
     Camera cam = new Camera(960, 540);
     int frame = 0;
@@ -37,8 +37,6 @@ public class StartState extends BasicGameState {
         tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
         playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
 
-        players = new ArrayList<>();
-
         ui = new UI_interface( 960, 540);
         playerInput = new PlayerInput();
         cam.setScale(3);
@@ -53,39 +51,37 @@ public class StartState extends BasicGameState {
 
     @Override
     public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+        // System.out.println("Rendering...");
         g.setBackground(new Color(83, 124, 68));
 
         ++frame;
 
-
         tree.draw(32, 32);
-        for(Player p : players) {
-            p.render();
+        synchronized (playerManager) {
+            for (Player p : playerManager.getPlayers()) {
+                p.render(playerInput);
+//                p.drawDebug(g, cam);
+            }
         }
 
         ui.render(g);
-
     }
 
     @Override
     public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-        Player player = getPlayer(playerID);
-        if(player != null) {
-            playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
-            ui.update(player);
+        // System.out.println("Updating...");
+        synchronized (playerManager) {
+            Player player = playerManager.getPlayer(playerID);
+            if (player != null) {
+                playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
+                ui.update(player);
 
-            cam.setTargetPos(player.getX(), player.getY());
-            cam.update(container.getInput(), player);
-        } else {
-            playerInput.update(container.getInput(), cam, new Vector(0, 0));
+                cam.setTargetPos(player.getX(), player.getY());
+                cam.update(container.getInput(), player);
+            } else {
+                playerInput.update(container.getInput(), cam, new Vector(0, 0));
+            }
         }
-    }
-
-    private Player getPlayer(int id) {
-        for(Player p : players) {
-            if(p.getID() == id) return p;
-        }
-        return null;
     }
 
     private Socket socket;
@@ -100,7 +96,7 @@ public class StartState extends BasicGameState {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
             playerID = in.readInt();
-            System.out.println("You are player #" + playerID);
+            // System.out.println("You are player #" + playerID);
 
             rsRunnable = new ReadServer(in);
             wsRunnable = new WriteServer(out, playerInput);
@@ -128,10 +124,11 @@ public class StartState extends BasicGameState {
                 while(true) {
                     int packetType = dataIN.readInt();
                     if(packetType == LotsOfYouGame.STATE_PACKET) {
+                        // System.out.println("Applying states");
                         int count = dataIN.readInt();
                         for(int i = 0; i != count; ++i) {
                             int playerId = dataIN.readInt();
-                            Player p = getPlayer(playerId);
+                            Player p = playerManager.getPlayer(playerId);
                             if(p != null) {
                                 PlayerState st = new PlayerState();
                                 st.read(dataIN);
@@ -140,14 +137,15 @@ public class StartState extends BasicGameState {
                             else {
                                 p = new Player(playerSprite, 0, 0, 6, 3);
                                 p.setID(playerId);
-                                players.add(p);
+                                playerManager.addPlayer(p, playerId);
                             }
                         }
                     }
+                    Thread.sleep(10);
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }
 
-            } catch (IOException ex) {
+            } catch (IOException | InterruptedException ex) {
                 //TODO : set up enemies here on client side
                 ex.printStackTrace();
             }
@@ -167,10 +165,9 @@ public class StartState extends BasicGameState {
         public void run() {
             try {
                 while(true) {
-                    if(input.isUpdated()) {
+                    if(input.pollUpdated()) {
                         dataOUT.writeInt(LotsOfYouGame.INPUT_PACKET);
                         input.send(dataOUT);
-                        //System.out.println("Input sent!");
                     }
                 }
             } catch (IOException ex) {
