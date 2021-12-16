@@ -17,9 +17,11 @@ public class Collectible {
     private Type type;
     private Vector pos;
     private SpriteStack sprite;
+    private SpriteStackAnimation animatedSprite;
+
 
     private static final float pickupDistance = 10.0f;
-    private static final float rotationSpeed = 5.0f;
+    private static final float rotationSpeed = 1.0f;
 
     private static final ArrayList<Collectible> collectibles = new ArrayList<>();
     private static Camera cam;
@@ -30,16 +32,17 @@ public class Collectible {
 
     public static void addCollectible(Type type, Vector pos) {
         try {
-            SpriteStack spriteStack = null;
+            Animations animations = new Animations(cam);
+            SpriteStackAnimation spriteStack = animations.walkingAnimation;
             switch (type) {
-                case ARMOR -> spriteStack = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
-                case SWORD -> spriteStack = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
-                default -> new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
+                case ARMOR -> spriteStack = animations.armorAnimation;
+                case SWORD -> spriteStack = animations.swordAnimation;
+              // default -> new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
             }
             collectibles.add(new Collectible(type, pos, spriteStack, idCtr++));
         } catch (java.lang.RuntimeException | org.newdawn.slick.SlickException e) {
             System.out.println("Couldn't find the texture, loading collectible without one.");
-            collectibles.add(new Collectible(type, pos, null, idCtr++));
+            collectibles.add(new Collectible(type, pos,  null, idCtr++));
         }
     }
 
@@ -55,10 +58,16 @@ public class Collectible {
         if(target != null) collectibles.remove(target);
     }
 
-    private Collectible(Type type, Vector pos, SpriteStack sprite, int id) {
+//    private Collectible(Type type, Vector pos, SpriteStack sprite, int id) {
+//        this.type = type;
+//        this.pos = pos;
+//        this.sprite = sprite;
+//        this.id = id;
+//    }
+    private Collectible(Type type, Vector pos, SpriteStackAnimation spriteAnimation, int id) {
         this.type = type;
         this.pos = pos;
-        this.sprite = sprite;
+        this.animatedSprite = spriteAnimation;
         this.id = id;
     }
 
@@ -75,7 +84,10 @@ public class Collectible {
     }
 
     public void render() {
-        sprite.setRotation(sprite.getRotation() + rotationSpeed);
-        sprite.draw(pos.getX() - (float)sprite.getFrameWidth() / 2, pos.getY() - (float)sprite.getFrameHeight() / 2);
+        animatedSprite.setRotation(animatedSprite.getRotation() + rotationSpeed);
+        animatedSprite.draw(pos.getX() - animatedSprite.getFrameWidth() / 2, pos.getY() - animatedSprite.getFrameHeight() / 2);
+    }
+    public void update(int delta) {
+        collectibles.forEach(c -> c.animatedSprite.update(delta));
     }
 }

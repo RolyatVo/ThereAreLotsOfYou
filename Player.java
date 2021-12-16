@@ -35,7 +35,7 @@ public class Player {
 
     SpriteStack playerSprite;
 
-    SpriteStackAnimation playerAnimation;
+    SpriteStackAnimation currentAnimation;
 
     PlayerInput input;
 
@@ -82,7 +82,7 @@ public class Player {
         ID = -99;
     }
     public Player(SpriteStackAnimation sprite, float x, float y, float width, float height) {
-        playerAnimation = sprite;
+        currentAnimation = sprite;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -249,14 +249,12 @@ public class Player {
     public void setArmorPlates(int plates) { this.armorPlates = plates; }
     public int getArmorPlates() { return this.armorPlates; }
 
-    public void render() { playerAnimation.draw(x - width / 2 ,y - height / 2); }
 
     public void render(PlayerInput in) {
-        playerAnimation.setRotation(lookRotation);
-        playerAnimation.draw(x - width / 2 ,y - height / 2);
+        currentAnimation.setRotation(lookRotation);
+        currentAnimation.draw(x - width / 2 ,y - height / 2);
 
     }
-    public void render(float x, float y) { playerAnimation.draw(x, y);}
 
     public float getMoveRotation() {
         return this.moveRotation;

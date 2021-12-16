@@ -51,10 +51,10 @@ public class SpriteStackAnimation extends Animation {
 
         if(isPlaying) {
             if (this.currentDuration < 0) {
-                if (currentFrame < 6) {
+                if (currentFrame < frames.size()) {
                     this.currentFrame++;
                 }
-                if (currentFrame == 6) {
+                if (currentFrame == frames.size()-1) {
                     this.currentFrame = 0;
                 }
                 this.currentDuration = getCurrentSSFrame().duration;
@@ -79,6 +79,17 @@ public class SpriteStackAnimation extends Animation {
         if(duration != 0) {
             frames.add(new SSFrame(ss, duration));
         }
+    }
+
+    public float getRotation() {
+        return this.rotation;
+    }
+
+    public float getFrameWidth() {
+        return getCurrentSSFrame().spritestack.getFrameWidth();
+    }
+    public float getFrameHeight() {
+        return getCurrentSSFrame().spritestack.getFrameHeight();
     }
 
     private class SSFrame {

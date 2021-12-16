@@ -1,8 +1,6 @@
 package lotsofyou;
 
 import jig.Vector;
-import org.lwjgl.examples.spaceinvaders.Sprite;
-import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -11,9 +9,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.security.Key;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class StartState extends BasicGameState {
 
@@ -24,6 +19,8 @@ public class StartState extends BasicGameState {
     Player player;
 
     PlayerInput playerInput;
+
+    private Animations animations;
 
     final PlayerManager playerManager = new PlayerManager();
     SpriteStack tree;
@@ -43,18 +40,12 @@ public class StartState extends BasicGameState {
 
         playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
 
-        SpriteStack[] frames = new SpriteStack[7];
-
-        frames[0] = new SpriteStack(LotsOfYouGame.WALKING_RSC_1, 6, 7, cam);
-        frames[1] = new SpriteStack(LotsOfYouGame.WALKING_RSC_2, 6, 7, cam);
-        frames[2] = new SpriteStack(LotsOfYouGame.WALKING_RSC_3, 6, 7, cam);
-        frames[3] = new SpriteStack(LotsOfYouGame.WALKING_RSC_4, 6, 7, cam);
-        frames[4] = new SpriteStack(LotsOfYouGame.WALKING_RSC_5, 6, 7, cam);
-        frames[5] = new SpriteStack(LotsOfYouGame.WALKING_RSC_6, 6, 7, cam);
+        animations = new Animations(cam);
 
 
 
-        playerAnimated = new SpriteStackAnimation(frames, 150);
+
+        playerAnimated = animations.walkingAnimation;
 
 
 
@@ -68,7 +59,7 @@ public class StartState extends BasicGameState {
 
     @Override
     public void enter(GameContainer container, StateBasedGame game) {
-        Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
+        Collectible.addCollectible(Collectible.Type.ARMOR, new Vector(-64, -64));
     }
 
     @Override
@@ -114,13 +105,15 @@ public class StartState extends BasicGameState {
                 ui.update(player);
 
                 if(playerInput.down || playerInput.up || playerInput.left || playerInput.right) {
-                    player.playerAnimation.play();
-                    player.playerAnimation.update(delta);
+                    player.currentAnimation.play();
+                    player.currentAnimation.update(delta);
                 }
                 else {
-                    player.playerAnimation.stop();
-                    player.playerAnimation.setFrame(0);
+                    player.currentAnimation.stop();
+                    player.currentAnimation.setFrame(0);
                 }
+                Collectible.getCollectibles().forEach(c -> c.update(delta));
+
 
                 cam.setTargetPos(player.getX(), player.getY());
                 cam.update(container.getInput(), player);

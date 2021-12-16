@@ -12,6 +12,8 @@ import org.newdawn.slick.state.StateBasedGame;
 import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.*;
+
+import static org.lwjgl.opengl.GL30.glCheckFramebufferStatus;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 /**
@@ -56,12 +58,63 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String ARMOR_RSC = "lotsofyou/resource/shield.png";
 	public static final String SWORD_RSC = "lotsofyou/resource/sword.png";
 
-	public static final String WALKING_RSC_1 = "lotsofyou/resource/Animations/Walking/player_1_FRAME0.png";
-	public static final String WALKING_RSC_2 = "lotsofyou/resource/Animations/Walking/player_1_FRAME1.png";
-	public static final String WALKING_RSC_3 = "lotsofyou/resource/Animations/Walking/player_1_FRAME2.png";
-	public static final String WALKING_RSC_4 = "lotsofyou/resource/Animations/Walking/player_1_FRAME3.png";
-	public static final String WALKING_RSC_5 = "lotsofyou/resource/Animations/Walking/player_1_FRAME4.png";
-	public static final String WALKING_RSC_6 = "lotsofyou/resource/Animations/Walking/player_1_FRAME5.png";
+	//Walking PNGs
+	public static final String WALKING_RSC_1 = "lotsofyou/resource/Animations/Walking_10x7/player_1_FRAME0.png";
+	public static final String WALKING_RSC_2 = "lotsofyou/resource/Animations/Walking_10x7/player_1_FRAME1.png";
+	public static final String WALKING_RSC_3 = "lotsofyou/resource/Animations/Walking_10x7/player_1_FRAME2.png";
+	public static final String WALKING_RSC_4 = "lotsofyou/resource/Animations/Walking_10x7/player_1_FRAME3.png";
+	public static final String WALKING_RSC_5 = "lotsofyou/resource/Animations/Walking_10x7/player_1_FRAME4.png";
+	public static final String WALKING_RSC_6 = "lotsofyou/resource/Animations/Walking_10x7/player_1_FRAME5.png";
+
+	//Armor Animated
+	public static final String ARMOR_RSC_0 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME0.png";
+	public static final String ARMOR_RSC_1 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME1.png";
+	public static final String ARMOR_RSC_2 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME2.png";
+	public static final String ARMOR_RSC_3 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME3.png";
+	public static final String ARMOR_RSC_4 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME4.png";
+	public static final String ARMOR_RSC_5 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME5.png";
+	public static final String ARMOR_RSC_6 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME6.png";
+	public static final String ARMOR_RSC_7 = "lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME7.png";
+
+	//Player Rolling
+	public static final String ROLLING_RSC_0 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME0.png";
+	public static final String ROLLING_RSC_1 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME1.png";
+	public static final String ROLLING_RSC_2 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME2.png";
+	public static final String ROLLING_RSC_3 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME3.png";
+	public static final String ROLLING_RSC_4 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME4.png";
+	public static final String ROLLING_RSC_5 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME5.png";
+	public static final String ROLLING_RSC_6 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME6.png";
+	public static final String ROLLING_RSC_7 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME7.png";
+	public static final String ROLLING_RSC_8 = "lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME8.png";
+
+	//Player Rolling With Sword
+	public static final String ROLLING_SWORD_RSC_0 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME0.png";
+	public static final String ROLLING_SWORD_RSC_1 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME1.png";
+	public static final String ROLLING_SWORD_RSC_2 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME2.png";
+	public static final String ROLLING_SWORD_RSC_3 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME3.png";
+	public static final String ROLLING_SWORD_RSC_4 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME4.png";
+	public static final String ROLLING_SWORD_RSC_5 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME5.png";
+	public static final String ROLLING_SWORD_RSC_6 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME6.png";
+	public static final String ROLLING_SWORD_RSC_7 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME7.png";
+	public static final String ROLLING_SWORD_RSC_8 = "lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME8.png";
+
+	//Sword Animated
+	public static final String SWORD_RSC_0 = "lotsofyou/resource/Animations/Sword_10x9/Sword_Animation_FRAME0.png";
+	public static final String SWORD_RSC_1 = "lotsofyou/resource/Animations/Sword_10x9/Sword_Animation_FRAME1.png";
+	public static final String SWORD_RSC_2 = "lotsofyou/resource/Animations/Sword_10x9/Sword_Animation_FRAME2.png";
+	public static final String SWORD_RSC_3 = "lotsofyou/resource/Animations/Sword_10x9/Sword_Animation_FRAME3.png";
+	public static final String SWORD_RSC_4 = "lotsofyou/resource/Animations/Sword_10x9/Sword_Animation_FRAME4.png";
+	public static final String SWORD_RSC_5 = "lotsofyou/resource/Animations/Sword_10x9/Sword_Animation_FRAME5.png";
+
+	//Walking with Sword
+	public static final String WALKING_SWORD_RSC_0 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME0.png";
+	public static final String WALKING_SWORD_RSC_1 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME1.png";
+	public static final String WALKING_SWORD_RSC_2 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME2.png";
+	public static final String WALKING_SWORD_RSC_3 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME3.png";
+	public static final String WALKING_SWORD_RSC_4 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME4.png";
+	public static final String WALKING_SWORD_RSC_5 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME5.png";
+
+
 
 
 
@@ -70,7 +123,6 @@ public class LotsOfYouGame extends StateBasedGame {
 
 	public final int ScreenWidth;
 	public final int ScreenHeight;
-
 	public static final int INPUT_PACKET = 0;
 	public static final int STATE_PACKET = 1;
 	public static final int REMOVE_COLLECTIBLE_PACKET = 2;
@@ -114,6 +166,7 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(SWORD_RSC);
 
 
+		//Walking Animations
 		ResourceManager.loadImage(WALKING_RSC_1);
 		ResourceManager.loadImage(WALKING_RSC_2);
 		ResourceManager.loadImage(WALKING_RSC_3);
@@ -121,6 +174,30 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(WALKING_RSC_5);
 		ResourceManager.loadImage(WALKING_RSC_6);
 
+		//Armour
+		for(int i=0; i < 8; i++) {
+			ResourceManager.loadImage("lotsofyou/resource/Animations/Armor_10x7/Armor_FRAME" + i + ".png");
+		}
+
+		//Rolling
+		for(int i=0; i < 9; i++) {
+			ResourceManager.loadImage("lotsofyou/resource/Animations/Rolling_10x11/Rolling_FRAME" + i + ".png");
+		}
+
+		//Rolling with Sword
+		for(int i=0; i < 9; i++) {
+			ResourceManager.loadImage("lotsofyou/resource/Animations/Rolling_Sword_10x11/Rolling_Sword_FRAME" + i + ".png");
+		}
+
+		//Sword Animated
+		for(int i=0; i < 6; i++) {
+			ResourceManager.loadImage("lotsofyou/resource/Animations/Sword_10x9/Sword_Animation_FRAME" + i + ".png");
+		}
+
+		//Player Walking with sword
+		for(int i=0; i < 6; i++) {
+			ResourceManager.loadImage("lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME" + i + ".png");
+		}
 
 
 	}
