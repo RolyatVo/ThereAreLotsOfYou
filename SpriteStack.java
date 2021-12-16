@@ -72,4 +72,12 @@ public class SpriteStack extends SpriteSheet {
             ++offset;
         }
     }
+
+    public int getFrameWidth() {
+        return this.width;
+    }
+
+    public int getFrameHeight() {
+        return this.height;
+    }
 }

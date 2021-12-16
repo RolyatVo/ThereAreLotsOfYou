@@ -41,12 +41,13 @@ public class StartState extends BasicGameState {
         playerInput = new PlayerInput();
         cam.setScale(3);
         serverConnect();
+        Collectible.setCollectibleRenderCam(cam);
     }
 
 
     @Override
     public void enter(GameContainer container, StateBasedGame game) {
-
+        Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
     }
 
     @Override
@@ -65,6 +66,12 @@ public class StartState extends BasicGameState {
         }
 
         ui.render(g);
+
+        synchronized (Collectible.getCollectibles()) {
+            for(Collectible c : Collectible.getCollectibles()) {
+                c.render();
+            }
+        }
     }
 
     @Override
@@ -138,6 +145,13 @@ public class StartState extends BasicGameState {
                                 p = new Player(playerSprite, 0, 0, 6, 3);
                                 p.setID(playerId);
                                 playerManager.addPlayer(p, playerId);
+                            }
+                        }
+                    } else if (packetType == LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET) {
+                        int size = dataIN.readInt();
+                        synchronized (Collectible.getCollectibles()) {
+                            for (int i = 0; i != size; ++i) {
+                                Collectible.removeCollectible(dataIN.readInt());
                             }
                         }
                     }

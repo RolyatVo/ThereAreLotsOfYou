@@ -258,4 +258,8 @@ public class Player {
             g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
         }
     }
+
+    public void collect(Collectible c) {
+        System.out.println("Collected " + c.getType().name() + "!");
+    }
 }

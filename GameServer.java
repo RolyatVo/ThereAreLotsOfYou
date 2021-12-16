@@ -18,6 +18,7 @@ public class GameServer {
     private ArrayList<Socket> playerSockets;
     private ArrayList<ReadClient> playersReadRunnable;
     private ArrayList<WriteClient> playersWriteRunnable;
+    private final ArrayList<Integer> removedCollectibles = new ArrayList<>();
 
     private final PlayerManager players;
 
@@ -39,7 +40,7 @@ public class GameServer {
             System.out.println("IO Exception from server");
         }
 
-
+        Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
     }
 
     public void listenForConnections() {
@@ -91,6 +92,19 @@ public class GameServer {
                     for (Player p : players.getPlayers()) {
                         // System.out.println("Updating player " + p.getID());
                         p.update(1000.0f / 60);
+
+                        synchronized (removedCollectibles) {
+                            for(Collectible c : Collectible.getCollectibles()) {
+                                if(c.intersects(new Vector(p.getX(), p.getY()))) {
+                                    p.collect(c);
+                                    removedCollectibles.add(c.getId());
+                                }
+                            }
+
+                            for (int i : removedCollectibles) {
+                                Collectible.removeCollectible(i);
+                            }
+                        }
 
                         for (Player other : players.getPlayers()) {
                             if (other != p && other.canHit(p) && p.hitBy(other)) {
@@ -164,6 +178,16 @@ public class GameServer {
                         dataOUT.writeInt(p.getID());
                         PlayerState st = p.getPlayerState();
                         st.write(dataOUT);
+                    }
+
+                    synchronized (removedCollectibles) {
+                        if(!removedCollectibles.isEmpty()) {
+                            dataOUT.writeInt(LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET);
+                            dataOUT.writeInt(removedCollectibles.size());
+                            for(int i : removedCollectibles) {
+                                dataOUT.writeInt(i);
+                            }
+                        }
                     }
                     try {
                         Thread.sleep(20);
