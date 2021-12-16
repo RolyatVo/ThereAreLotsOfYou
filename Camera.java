@@ -39,12 +39,24 @@ public class Camera {
         return new Vector(x, y);
     }
 
+    public Vector getRenderRes() {
+        return new Vector(width, height).scale(1.0f / scale);
+    }
+
+    public float getRenderWidth() {
+        return width / scale;
+    }
+
+    public float getRenderHeight() {
+        return height / scale;
+    }
+
     public float getX() {
         return x;
     }
 
     public float getCenterX() {
-        return x + width / 2;
+        return x + getRenderWidth() / 2;
     }
 
     public float getY() {
@@ -52,7 +64,7 @@ public class Camera {
     }
 
     public float getCenterY() {
-        return y + height / 2;
+        return y + getRenderHeight() / 2;
     }
 
     public float getWidth() {
@@ -125,10 +137,10 @@ public class Camera {
         double cs = Math.cos(Math.toRadians(-rotation));
         double sn = Math.sin(Math.toRadians(-rotation));
 
-        float newCenterOffsetX = x - (width / 2);
-        float newCenterOffsetY = y - (height / 2);
-        float oldCenterOffsetX = (float)(newCenterOffsetX * cs - newCenterOffsetY * sn) / scale;
-        float oldCenterOffsetY = (float)(newCenterOffsetX * sn + newCenterOffsetY * cs) / scale;
-        return new Vector(oldCenterOffsetX + (width / 2) + this.x, oldCenterOffsetY + (height / 2) + this.y);
+        float newCenterOffsetX = x / scale - (getRenderWidth() / 2);
+        float newCenterOffsetY = y / scale - (getRenderHeight() / 2);
+        float oldCenterOffsetX = (float)(newCenterOffsetX * cs - newCenterOffsetY * sn);
+        float oldCenterOffsetY = (float)(newCenterOffsetX * sn + newCenterOffsetY * cs);
+        return new Vector(oldCenterOffsetX + (getRenderWidth() / 2) + this.x, oldCenterOffsetY + (getRenderHeight() / 2) + this.y);
     }
 }

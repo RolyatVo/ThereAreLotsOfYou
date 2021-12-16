@@ -73,6 +73,7 @@ public class LotsOfYouGame extends StateBasedGame {
 
 	public static final int INPUT_PACKET = 0;
 	public static final int STATE_PACKET = 1;
+	public static final int REMOVE_COLLECTIBLE_PACKET = 2;
 
 	/**
 	 * Create the BounceGame frame, saving the width and height for later use.
@@ -134,6 +135,6 @@ public class LotsOfYouGame extends StateBasedGame {
 			app.start();
 		} catch (Exception e) {
 			e.printStackTrace();
-    }
+    	}
 	}
 }

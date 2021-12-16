@@ -9,6 +9,7 @@ import java.io.IOException;
 public class PlayerState {
     float x;
     float y;
+    float lookRotation;
     float moveRotation;
     float targetMoveRotation;
     int health;
@@ -20,10 +21,11 @@ public class PlayerState {
 
     public PlayerState() {};
 
-    public PlayerState(float x_, float y_, float moveRotation_, float targetMoveRotation_, int health_, int armorPlates_,
+    public PlayerState(float x_, float y_, float lookRotation_, float moveRotation_, float targetMoveRotation_, int health_, int armorPlates_,
                        float actionTime_, Vector rollDir, Player.State state_) {
         this.x = x_;
         this.y = y_;
+        this.lookRotation = lookRotation_;
         this.moveRotation = moveRotation_;
         this.targetMoveRotation = targetMoveRotation_;
         this.health = health_;
@@ -37,6 +39,7 @@ public class PlayerState {
     void write(DataOutputStream dataOutputStream) throws IOException {
         dataOutputStream.writeFloat(x);
         dataOutputStream.writeFloat(y);
+        dataOutputStream.writeFloat(lookRotation);
         dataOutputStream.writeFloat(moveRotation);
         dataOutputStream.writeFloat(targetMoveRotation);
 
@@ -53,6 +56,7 @@ public class PlayerState {
     void read(DataInputStream dataInputStream) throws IOException {
         x = dataInputStream.readFloat();
         y = dataInputStream.readFloat();
+        lookRotation = dataInputStream.readFloat();
         moveRotation = dataInputStream.readFloat();
         targetMoveRotation = dataInputStream.readFloat();
 

@@ -46,7 +46,21 @@ public class PlayerInput {
         this.lookRotation = other.lookRotation;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if(other instanceof PlayerInput) {
+            PlayerInput oi = (PlayerInput) other;
+            return this.up == oi.up && this.down == oi.down && this.left == oi.left && this.right == oi.right &&
+                    this.rotateRight == oi.rotateRight && this.rotateLeft == oi.rotateLeft &&
+                    this.roll == oi.roll && this.attack == oi.attack && this.lookRotation == oi.lookRotation;
+        }
+        return false;
+    }
+
     synchronized void update(Input in, Camera cam, Vector playerPos) {
+
+        PlayerInput prev = new PlayerInput(this);
+
         up = in.isKeyDown(Input.KEY_W);
         down = in.isKeyDown(Input.KEY_S);
         left = in.isKeyDown(Input.KEY_A);
@@ -62,11 +76,13 @@ public class PlayerInput {
             lookRotation = (float) mousePos.subtract(playerPos).getRotation();
         }
 
-        updated = true;
+        if(!prev.equals(this)) updated = true;
     }
 
-    synchronized boolean isUpdated() {
-        return updated;
+    synchronized boolean pollUpdated() {
+        boolean ret = updated;
+        updated = false;
+        return ret;
     }
 
     synchronized void send(DataOutputStream outputStream) throws IOException {

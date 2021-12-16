@@ -3,12 +3,14 @@ package lotsofyou;
 import jig.Vector;
 import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.lwjgl.input.Keyboard;
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Player {
 
@@ -47,8 +49,8 @@ public class Player {
     private float actionTime;
     private final float rollTimeMax = 0.2f;
     private final float attackTimeMax = 0.5f;
-    private final float attackOffset = 20.0f;
-    private final float attackRadius = 40.0f;
+    private final float attackOffset = 5.0f;
+    private final float attackRadius = 10.0f;
 
     private Vector rollDir;
 
@@ -59,6 +61,8 @@ public class Player {
     }
 
     private State state;
+
+    ArrayList<Integer> hitPlayers;
 
     public Player(SpriteStack sprite, float x, float y, float width, float height) {
         playerSprite = sprite;
@@ -73,6 +77,7 @@ public class Player {
         this.rollDir = new Vector(0, 0);
         this.input = new PlayerInput();
         this.state = State.FREE;
+        this.hitPlayers = new ArrayList<>();
         keyPress = -1;
         ID = -99;
     }
@@ -108,6 +113,7 @@ public class Player {
         this.actionTime = 0;
         this.rollDir = new Vector(0, 0);
         this.input = new PlayerInput();
+        this.hitPlayers = new ArrayList<>();
 
         this.state = State.FREE;
     }
@@ -157,8 +163,11 @@ public class Player {
         x += transX;
         y += transY;
 
-        if(playerSprite != null) playerSprite.setRotation(input.lookRotation);
-        if(playerAnimation != null) playerAnimation.setRotation(input.lookRotation);
+      //  if(playerSprite != null) playerSprite.setRotation(input.lookRotation);
+      //  if(playerAnimation != null) playerAnimation.setRotation(input.lookRotation);
+
+        lookRotation = input.lookRotation;
+
 
         if(input.attack) {
             actionTime = 0;
@@ -172,7 +181,10 @@ public class Player {
     }
 
     private void attacking(float deltaSeconds) {
-        if(actionTime > attackTimeMax) state = State.FREE;
+        if(actionTime > attackTimeMax) {
+            hitPlayers.clear();
+            state = State.FREE;
+        }
         actionTime += deltaSeconds;
     }
 
@@ -188,6 +200,14 @@ public class Player {
 
         if(actionTime > rollTimeMax) state = State.FREE;
         actionTime += deltaSeconds;
+    }
+
+    public void hit(Player other) {
+        hitPlayers.add(other.getID());
+    }
+
+    public boolean canHit(Player other) {
+        return !hitPlayers.contains(other.getID());
     }
 
     public boolean hitBy(Player other) {
@@ -229,7 +249,12 @@ public class Player {
     public void setArmorPlates(int plates) { this.armorPlates = plates; }
     public int getArmorPlates() { return this.armorPlates; }
 
-    public void render() { playerAnimation.draw(x - width / 2 ,y - height / 2);
+    public void render() { playerAnimation.draw(x - width / 2 ,y - height / 2); }
+
+    public void render(PlayerInput in) {
+        playerAnimation.setRotation(lookRotation);
+        playerAnimation.draw(x - width / 2 ,y - height / 2);
+
     }
     public void render(float x, float y) { playerAnimation.draw(x, y);}
 
@@ -238,12 +263,13 @@ public class Player {
     }
 
     public PlayerState getPlayerState() {
-        return new PlayerState(x, y, moveRotation, targetMoveRotation, healthNUM, armorPlates, actionTime, rollDir, state);
+        return new PlayerState(x, y, lookRotation, moveRotation, targetMoveRotation, healthNUM, armorPlates, actionTime, rollDir, state);
     }
 
     public void setPlayerState(PlayerState targetState) {
         x = targetState.x;
         y = targetState.y;
+        lookRotation = targetState.lookRotation;
         moveRotation = targetState.moveRotation;
         targetMoveRotation = targetState.targetMoveRotation;
         healthNUM = targetState.health;
@@ -251,5 +277,19 @@ public class Player {
         actionTime = targetState.actionTime;
         rollDir = new Vector(targetState.rollX, targetState.rollY);
         state = State.values()[targetState.state];
+    }
+
+    public void drawDebug(Graphics g, Camera cam) {
+        if(state == State.ATTACKING) {
+            System.out.println("Cam Pos: " + cam.getPos().getX() + ", " + cam.getPos().getY());
+            Vector worldPos = new Vector(x, y).add(new Vector(5, 0).setRotation(lookRotation).setLength(attackOffset));
+            System.out.println("World Pos: " + worldPos.getX() + ", " + worldPos.getY());
+            float viewableAttackRadius = attackRadius * cam.getScale();
+            g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
+        }
+    }
+
+    public void collect(Collectible c) {
+        System.out.println("Collected " + c.getType().name() + "!");
     }
 }

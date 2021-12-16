@@ -25,7 +25,7 @@ public class StartState extends BasicGameState {
 
     PlayerInput playerInput;
 
-    ArrayList<Player> players;
+    final PlayerManager playerManager = new PlayerManager();
     SpriteStack tree;
     Camera cam = new Camera(960, 540);
     int frame = 0;
@@ -43,7 +43,6 @@ public class StartState extends BasicGameState {
 
         playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
 
-
         SpriteStack[] frames = new SpriteStack[7];
 
         frames[0] = new SpriteStack(LotsOfYouGame.WALKING_RSC_1, 6, 7, cam);
@@ -57,64 +56,78 @@ public class StartState extends BasicGameState {
 
         playerAnimated = new SpriteStackAnimation(frames, 150);
 
-        players = new ArrayList<>();
 
 
         ui = new UI_interface( 960, 540);
         playerInput = new PlayerInput();
         cam.setScale(3);
         serverConnect();
+        Collectible.setCollectibleRenderCam(cam);
     }
 
 
     @Override
     public void enter(GameContainer container, StateBasedGame game) {
-
+        Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
     }
 
     @Override
     public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+        // System.out.println("Rendering...");
         g.setBackground(new Color(83, 124, 68));
 
         ++frame;
 
-
         tree.draw(32, 32);
-        for(Player p : players) {
-            p.render();
+        synchronized (playerManager) {
+            for (Player p : playerManager.getPlayers()) {
+                p.render(playerInput);
+//                p.drawDebug(g, cam);
+            }
         }
 
         ui.render(g);
 
+        synchronized (Collectible.getCollectibles()) {
+            for(Collectible c : Collectible.getCollectibles()) {
+                c.render();
+            }
+        }
     }
 
     @Override
     public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-        Player player = getPlayer(playerID);
-        if(player != null) {
-            playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
-            ui.update(player);
+//            if(playerInput.down || playerInput.up || playerInput.left || playerInput.right) {
+//                player.playerAnimation.play();
+//                player.playerAnimation.update(delta);
+//            }
+//            else {
+//                player.playerAnimation.stop();
+//                player.playerAnimation.setFrame(0);
+//            }
 
-            if(playerInput.down || playerInput.up || playerInput.left || playerInput.right) {
-                player.playerAnimation.play();
-                player.playerAnimation.update(delta);
-            }
-            else {
-                player.playerAnimation.stop();
-                player.playerAnimation.setFrame(0);
-            }
-            cam.setTargetPos(player.getX(), player.getY());
-            cam.update(container.getInput(), player);
-        } else {
-            playerInput.update(container.getInput(), cam, new Vector(0, 0));
-        }
-    }
+        // System.out.println("Updating...");
+        synchronized (playerManager) {
+            Player player = playerManager.getPlayer(playerID);
+            if (player != null) {
+                playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
+                ui.update(player);
 
-    private Player getPlayer(int id) {
-        for(Player p : players) {
-            if(p.getID() == id) return p;
+                if(playerInput.down || playerInput.up || playerInput.left || playerInput.right) {
+                    player.playerAnimation.play();
+                    player.playerAnimation.update(delta);
+                }
+                else {
+                    player.playerAnimation.stop();
+                    player.playerAnimation.setFrame(0);
+                }
+
+                cam.setTargetPos(player.getX(), player.getY());
+                cam.update(container.getInput(), player);
+            } else {
+                playerInput.update(container.getInput(), cam, new Vector(0, 0));
+            }
         }
-        return null;
     }
 
     private Socket socket;
@@ -129,7 +142,7 @@ public class StartState extends BasicGameState {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
             playerID = in.readInt();
-            System.out.println("You are player #" + playerID);
+            // System.out.println("You are player #" + playerID);
 
             rsRunnable = new ReadServer(in);
             wsRunnable = new WriteServer(out, playerInput);
@@ -157,10 +170,11 @@ public class StartState extends BasicGameState {
                 while(true) {
                     int packetType = dataIN.readInt();
                     if(packetType == LotsOfYouGame.STATE_PACKET) {
+                        // System.out.println("Applying states");
                         int count = dataIN.readInt();
                         for(int i = 0; i != count; ++i) {
                             int playerId = dataIN.readInt();
-                            Player p = getPlayer(playerId);
+                            Player p = playerManager.getPlayer(playerId);
                             if(p != null) {
                                 PlayerState st = new PlayerState();
                                 st.read(dataIN);
@@ -169,14 +183,22 @@ public class StartState extends BasicGameState {
                             else {
                                 p = new Player(playerAnimated, 0, 0, 6, 7);
                                 p.setID(playerId);
-                                players.add(p);
+                                playerManager.addPlayer(p, playerId);
+                            }
+                        }
+                    } else if (packetType == LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET) {
+                        int size = dataIN.readInt();
+                        synchronized (Collectible.getCollectibles()) {
+                            for (int i = 0; i != size; ++i) {
+                                Collectible.removeCollectible(dataIN.readInt());
                             }
                         }
                     }
+                    Thread.sleep(10);
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }
 
-            } catch (IOException ex) {
+            } catch (IOException | InterruptedException ex) {
                 //TODO : set up enemies here on client side
                 ex.printStackTrace();
             }
@@ -196,10 +218,9 @@ public class StartState extends BasicGameState {
         public void run() {
             try {
                 while(true) {
-                    if(input.isUpdated()) {
+                    if(input.pollUpdated()) {
                         dataOUT.writeInt(LotsOfYouGame.INPUT_PACKET);
                         input.send(dataOUT);
-                        //System.out.println("Input sent!");
                     }
                 }
             } catch (IOException ex) {

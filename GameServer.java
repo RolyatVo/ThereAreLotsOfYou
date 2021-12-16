@@ -18,8 +18,9 @@ public class GameServer {
     private ArrayList<Socket> playerSockets;
     private ArrayList<ReadClient> playersReadRunnable;
     private ArrayList<WriteClient> playersWriteRunnable;
+    private final ArrayList<Integer> removedCollectibles = new ArrayList<>();
 
-    private ArrayList<Player> players;
+    private final PlayerManager players;
 
     Thread listen;
 
@@ -28,7 +29,7 @@ public class GameServer {
         playerSockets = new ArrayList<>();
         playersReadRunnable = new ArrayList<>();
         playersWriteRunnable = new ArrayList<>();
-        players = new ArrayList<>();
+        players = new PlayerManager();
         playerCount = 0;
         playerCountMax = 10;
 
@@ -39,7 +40,7 @@ public class GameServer {
             System.out.println("IO Exception from server");
         }
 
-
+        Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
     }
 
     public void listenForConnections() {
@@ -85,9 +86,34 @@ public class GameServer {
             //lock to time step;
             long currTime = System.currentTimeMillis();
             if((double)(currTime - lastUpdate) > (1000.0 / 60)) {
+                // System.out.println("Attempting to update?");
                 lastUpdate = currTime;
-                for (Player p : players) {
-                    p.update(1000.0f / 60);
+                synchronized (players) {
+                    for (Player p : players.getPlayers()) {
+                        // System.out.println("Updating player " + p.getID());
+                        p.update(1000.0f / 60);
+
+                        synchronized (removedCollectibles) {
+                            for(Collectible c : Collectible.getCollectibles()) {
+                                if(c.intersects(new Vector(p.getX(), p.getY()))) {
+                                    p.collect(c);
+                                    removedCollectibles.add(c.getId());
+                                }
+                            }
+
+                            for (int i : removedCollectibles) {
+                                Collectible.removeCollectible(i);
+                            }
+                        }
+
+                        for (Player other : players.getPlayers()) {
+                            if (other != p && other.canHit(p) && p.hitBy(other)) {
+                                System.out.println("Hit?");
+                                other.hit(p);
+                                p.damage(10);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -111,22 +137,22 @@ public class GameServer {
                     if(packetType == LotsOfYouGame.INPUT_PACKET) {
                         PlayerInput in = new PlayerInput();
                         in.read(dataIN);
-                        Player p = getPlayer(playerID);
-                        if(p != null) {
-                            synchronized (p) {
+                        synchronized (players) {
+                            Player p = players.getPlayer(playerID);
+                            if (p != null) {
+                                // System.out.println("Applying input...");
                                 p.setPlayerInput(in);
+                            } else {
+                                players.addPlayer(new Player(0, 0, playerID), playerID);
+                                System.out.println("New Player! Id: " + playerID);
                             }
-                        } else {
-                            players.add( new Player(0, 0, playerID));
-                            System.out.println("New Player! Id: " + playerID);
                         }
                     }
-
                 }
 
             } catch(IOException ex) {
 //                ex.printStackTrace();
-                players.remove(getPlayer(playerID));
+                players.removePlayer(playerID);
                 System.out.println("Socket closed for player " + playerID);
                 playerCount--;
                 //this removes the "top" player id
@@ -147,14 +173,24 @@ public class GameServer {
             try {
                 while(true) {
                     dataOUT.writeInt(LotsOfYouGame.STATE_PACKET);
-                    dataOUT.writeInt(players.size());
-                    for(Player p : players) {
+                    dataOUT.writeInt(players.getPlayers().size());
+                    for(Player p : players.getPlayers()) {
                         dataOUT.writeInt(p.getID());
                         PlayerState st = p.getPlayerState();
                         st.write(dataOUT);
                     }
+
+                    synchronized (removedCollectibles) {
+                        if(!removedCollectibles.isEmpty()) {
+                            dataOUT.writeInt(LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET);
+                            dataOUT.writeInt(removedCollectibles.size());
+                            for(int i : removedCollectibles) {
+                                dataOUT.writeInt(i);
+                            }
+                        }
+                    }
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(20);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
@@ -163,14 +199,6 @@ public class GameServer {
                 ex.printStackTrace();
             }
         }
-    }
-
-    private Player getPlayer(int id) {
-        for(Player p : players) {
-            if (p.getID() == id)
-                return p;
-        }
-        return null;
     }
 
 
