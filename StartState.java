@@ -19,16 +19,16 @@ public class StartState extends BasicGameState {
 
     UI_interface ui;
     SpriteStack playerSprite;
+
     SpriteStackAnimation playerAnimated;
     Player player;
+
+    PlayerInput playerInput;
+
     ArrayList<Player> players;
     SpriteStack tree;
     Camera cam = new Camera(960, 540);
     int frame = 0;
-
-
-    float posX = 960.0f / 2;
-    float posY = 540.0f / 2;
 
 
     @Override
@@ -59,8 +59,9 @@ public class StartState extends BasicGameState {
 
         players = new ArrayList<>();
 
-        player = new Player(playerAnimated, posX, posY, 6, 3);
-        ui = new UI_interface(player, 960, 540);
+
+        ui = new UI_interface( 960, 540);
+        playerInput = new PlayerInput();
         cam.setScale(3);
         serverConnect();
     }
@@ -78,23 +79,27 @@ public class StartState extends BasicGameState {
         ++frame;
 
 
-        tree.draw(posX + 32, posY + 32);
-        player.render();
-//        if(playerCoords[enemyID] != null)
-//            enemyPlayer.render(playerCoords[enemyID].getX(), playerCoords[enemyID].getY());
+        tree.draw(32, 32);
+        for(Player p : players) {
+            p.render();
+        }
 
-
-        players.forEach(p -> p.render(p.getX(), p.getY()));
         ui.render(g);
 
     }
 
     @Override
     public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-        player.update(delta, container.getInput(), cam);
-        cam.setTargetPos(player.getX(), player.getY());
-        cam.update(container.getInput(), player);
-        ui.update(player);
+        Player player = getPlayer(playerID);
+        if(player != null) {
+            playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
+            ui.update(player);
+
+            cam.setTargetPos(player.getX(), player.getY());
+            cam.update(container.getInput(), player);
+        } else {
+            playerInput.update(container.getInput(), cam, new Vector(0, 0));
+        }
     }
 
     private Player getPlayer(int id) {
@@ -119,7 +124,7 @@ public class StartState extends BasicGameState {
             System.out.println("You are player #" + playerID);
 
             rsRunnable = new ReadServer(in);
-            wsRunnable = new WriteServer(out);
+            wsRunnable = new WriteServer(out, playerInput);
 
             Thread readServer = new Thread(rsRunnable);
             Thread writeServer = new Thread(wsRunnable);
@@ -137,30 +142,28 @@ public class StartState extends BasicGameState {
 
         public ReadServer (DataInputStream in) {
             dataIN = in;
-            System.out.println("Read to Server runnable created!!");
-
-
+            System.out.println("Read from Server runnable created!!");
         }
         public void run() {
             try {
                 while(true) {
-                    //TODO:  Should go through and update each enemy get server to send each
-                    //TODO: Make it so server sends "commands" or prompts so that we know what information is about to
-                    // come through
-                    int enemyID = dataIN.readInt();
-                    Player enemy = getPlayer(enemyID);
-                    if(enemy  != null) {
-                        float xpos = dataIN.readFloat();
-                        float ypos = dataIN.readFloat();
-                        enemy.setX(xpos);
-                        enemy.setY(ypos);
-
-                    }
-                    else {
-                        enemy = new Player(playerSprite, 0, 0, 16, 16);
-                        enemy.setID(enemyID);
-                        players.add(enemy);
-
+                    int packetType = dataIN.readInt();
+                    if(packetType == LotsOfYouGame.STATE_PACKET) {
+                        int count = dataIN.readInt();
+                        for(int i = 0; i != count; ++i) {
+                            int playerId = dataIN.readInt();
+                            Player p = getPlayer(playerId);
+                            if(p != null) {
+                                PlayerState st = new PlayerState();
+                                st.read(dataIN);
+                                p.setPlayerState(st);
+                            }
+                            else {
+                                p = new Player(playerSprite, 0, 0, 6, 3);
+                                p.setID(playerId);
+                                players.add(p);
+                            }
+                        }
                     }
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }
@@ -174,30 +177,22 @@ public class StartState extends BasicGameState {
     }
     private class WriteServer implements Runnable {
         private DataOutputStream dataOUT;
+        private PlayerInput input;
 
-        public WriteServer (DataOutputStream out) {
+        public WriteServer (DataOutputStream out, PlayerInput input) {
             dataOUT = out;
+            this.input = input;
             System.out.println("Write to Server runnable created!!");
 
         }
         public void run() {
             try {
                 while(true) {
-                    //TODO Maybe try to get client send a command or response so that server knows what to do
-                    dataOUT.writeFloat(player.getX());
-                    dataOUT.writeFloat(player.getY());
-                    dataOUT.flush();
-                    if (player.getKeyPress() != -1) {
-                        System.out.println("Player Pressed: " + player.getKeyPress());
+                    if(input.isUpdated()) {
+                        dataOUT.writeInt(LotsOfYouGame.INPUT_PACKET);
+                        input.send(dataOUT);
+                        //System.out.println("Input sent!");
                     }
-//          System.out.println("X: " + player.getX() +" Y: " + player.getY());
-                    try {
-                        Thread.sleep(25);
-
-                    } catch (InterruptedException ex) {
-                        ex.fillInStackTrace();
-                    }
-
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();

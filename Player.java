@@ -32,7 +32,11 @@ public class Player {
     private int ID;
 
     SpriteStack playerSprite;
+
     SpriteStackAnimation playerAnimation;
+
+    PlayerInput input;
+
 
     private int healthNUM = 50;
     private int armorPlates = 0;
@@ -48,7 +52,7 @@ public class Player {
 
     private Vector rollDir;
 
-    private enum State {
+    enum State {
         FREE,
         ATTACKING,
         ROLLING
@@ -67,9 +71,10 @@ public class Player {
         this.targetMoveRotation = 0;
         this.actionTime = 0;
         this.rollDir = new Vector(0, 0);
+        this.input = new PlayerInput();
+        this.state = State.FREE;
         keyPress = -1;
         ID = -99;
-        state = State.FREE;
     }
     public Player(SpriteStackAnimation sprite, float x, float y, float width, float height) {
         playerAnimation = sprite;
@@ -94,24 +99,38 @@ public class Player {
         this.y = y;
         ID = id;
 
+        this.width = 6;
+        this.height = 3;
+        this.lookRotation = 0;
+        this.moveRotation = 0;
+        this.targetMoveRotation = 0;
+        this.actionTime = 0;
+        this.rollDir = new Vector(0, 0);
+        this.input = new PlayerInput();
+
+        this.state = State.FREE;
     }
 
-    void update(float delta, Input in, Camera cam) {
+    void update(float delta) {
         float deltaSeconds = delta / 1000;
 
         playerAnimation.update((int) delta);
 
         switch (state) {
-            case FREE -> free(deltaSeconds, in, cam);
+            case FREE -> free(deltaSeconds);
             case ROLLING -> rolling(deltaSeconds);
             case ATTACKING -> attacking(deltaSeconds);
         }
     }
 
-    private void free(float deltaSeconds, Input in, Camera cam) {
-        if(in.isKeyPressed(Keyboard.KEY_Q)) {
+    void setPlayerInput(PlayerInput input) {
+        this.input = new PlayerInput(input);
+    }
+
+    private void free(float deltaSeconds) {
+        if(input.rotateLeft) {
             targetMoveRotation += rotationAmount;
-        } else if (in.isKeyPressed(Keyboard.KEY_E)) {
+        } else if (input.rotateRight) {
             targetMoveRotation -= rotationAmount;
         }
 
@@ -124,10 +143,10 @@ public class Player {
         keyPress = -1;
         int xDir = 0;
         int yDir = 0;
-        if(in.isKeyDown(Keyboard.KEY_A)) { --xDir; keyPress = Keyboard.KEY_A; }
-        if(in.isKeyDown(Keyboard.KEY_D)) { ++xDir; keyPress = Keyboard.KEY_D; }
-        if(in.isKeyDown(Keyboard.KEY_W)) { --yDir; keyPress = Keyboard.KEY_W; }
-        if(in.isKeyDown(Keyboard.KEY_S)) { ++yDir; keyPress = Keyboard.KEY_S; }
+        if(input.left) { --xDir; keyPress = Keyboard.KEY_A; }
+        if(input.right) { ++xDir; keyPress = Keyboard.KEY_D; }
+        if(input.up) { --yDir; keyPress = Keyboard.KEY_W; }
+        if(input.down) { ++yDir; keyPress = Keyboard.KEY_S; }
 
         float transX = (float)Math.sin(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
         float transY = (float)Math.cos(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
@@ -138,16 +157,12 @@ public class Player {
         x += transX;
         y += transY;
 
-        if(in.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
-            Vector mousePos = cam.screenToWorld(in.getMouseX(), in.getMouseY());
-            lookRotation = (float)mousePos.subtract(new Vector(x, y)).getRotation(); //+ cam.getRotation();
-            playerSprite.setRotation(lookRotation);
-        }
+        if(playerSprite != null) playerSprite.setRotation(input.lookRotation);
 
-        if(in.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
+        if(input.attack) {
             actionTime = 0;
             state = State.ATTACKING;
-        } else if (in.isKeyPressed(Input.KEY_LSHIFT) && (xDir != 0 || yDir != 0)) {
+        } else if (input.roll && (xDir != 0 || yDir != 0)) {
             rollDir = new Vector(xDir, yDir);
 
             actionTime = 0;
@@ -221,4 +236,19 @@ public class Player {
         return this.moveRotation;
     }
 
+    public PlayerState getPlayerState() {
+        return new PlayerState(x, y, moveRotation, targetMoveRotation, healthNUM, armorPlates, actionTime, rollDir, state);
+    }
+
+    public void setPlayerState(PlayerState targetState) {
+        x = targetState.x;
+        y = targetState.y;
+        moveRotation = targetState.moveRotation;
+        targetMoveRotation = targetState.targetMoveRotation;
+        healthNUM = targetState.health;
+        armorPlates = targetState.armorPlates;
+        actionTime = targetState.actionTime;
+        rollDir = new Vector(targetState.rollX, targetState.rollY);
+        state = State.values()[targetState.state];
+    }
 }

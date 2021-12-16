@@ -5,6 +5,9 @@ import jig.Vector;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class GameServer {
 
@@ -17,6 +20,8 @@ public class GameServer {
     private ArrayList<WriteClient> playersWriteRunnable;
 
     private ArrayList<Player> players;
+
+    Thread listen;
 
     public GameServer () {
         System.out.println("Starting Server");
@@ -36,37 +41,55 @@ public class GameServer {
 
 
     }
-    public void acceptConnection() {
-        try {
-            System.out.println("Looking for connections");
 
-            while(playerCount < playerCountMax) {
-                Socket server = serverSocket.accept();
-                DataInputStream serverIn = new DataInputStream(server.getInputStream());
-                DataOutputStream serverOut = new DataOutputStream(server.getOutputStream());
+    public void listenForConnections() {
+        listen = new Thread(() -> {
+            try {
+                System.out.println("Looking for connections");
 
-                playerCount++;
-                serverOut.writeInt(playerCount);
-                System.out.println("Player " + playerCount + " has joined!");
+                while(playerCount < playerCountMax) {
+                    Socket server = serverSocket.accept();
+                    DataInputStream serverIn = new DataInputStream(server.getInputStream());
+                    DataOutputStream serverOut = new DataOutputStream(server.getOutputStream());
 
-                ReadClient rc = new ReadClient(playerCount, serverIn);
-                WriteClient wc = new WriteClient(playerCount, serverOut);
+                    playerCount++;
+                    serverOut.writeInt(playerCount);
+                    System.out.println("Player " + playerCount + " has joined!");
 
-                playerSockets.add(server);
-                playersWriteRunnable.add(wc);
-                playersReadRunnable.add(rc);
+                    ReadClient rc = new ReadClient(playerCount, serverIn);
+                    WriteClient wc = new WriteClient(playerCount, serverOut);
 
-                Thread readClients = new Thread(playersReadRunnable.get(playersReadRunnable.size()-1));
+                    playerSockets.add(server);
+                    playersWriteRunnable.add(wc);
+                    playersReadRunnable.add(rc);
 
-                Thread writeClients = new Thread(playersWriteRunnable.get(playersWriteRunnable.size()-1));
+                    Thread readClients = new Thread(playersReadRunnable.get(playersReadRunnable.size()-1));
 
-                readClients.start();
-                writeClients.start();
+                    Thread writeClients = new Thread(playersWriteRunnable.get(playersWriteRunnable.size()-1));
 
-             }
+                    readClients.start();
+                    writeClients.start();
 
-        } catch (IOException exception) {
-            System.out.println("Exception from acceptConnection");
+                }
+
+            } catch (IOException exception) {
+                System.out.println("Exception from acceptConnection");
+            }
+        });
+        listen.start();
+    }
+
+    public void loop() {
+        long lastUpdate = System.currentTimeMillis();
+        for(;;) {
+            //lock to time step;
+            long currTime = System.currentTimeMillis();
+            if((double)(currTime - lastUpdate) > (1000.0 / 60)) {
+                lastUpdate = currTime;
+                for (Player p : players) {
+                    p.update(1000.0f / 60);
+                }
+            }
         }
     }
 
@@ -84,21 +107,21 @@ public class GameServer {
         public void run() {
             try {
                 while(true) {
-                    float x, y;
-                    Player current = getPlayer(playerID);
-                    x = dataIN.readFloat();
-                    y = dataIN.readFloat();
-                    if(current != null) {
+                    int packetType = dataIN.readInt();
+                    if(packetType == LotsOfYouGame.INPUT_PACKET) {
+                        PlayerInput in = new PlayerInput();
+                        in.read(dataIN);
+                        Player p = getPlayer(playerID);
+                        if(p != null) {
+                            synchronized (p) {
+                                p.setPlayerInput(in);
+                            }
+                        } else {
+                            players.add( new Player(0, 0, playerID));
+                            System.out.println("New Player! Id: " + playerID);
+                        }
+                    }
 
-                        current.setX(x);
-                        current.setY(y);
-                        //System.out.println("X: " + x + " Y: " + y);
-                       // System.out.println("Player " + playerID + ": X: " + playerCoords[playerID].getX() + " Y: " + playerCoords[playerID].getY());
-                    }
-                    else {
-                        players.add( new Player(x,y, playerID));
-                      //  System.out.println("New Player " + playerID + ": X: " + playerCoords[playerID].getX() + " Y: " + playerCoords[playerID].getY());
-                    }
                 }
 
             } catch(IOException ex) {
@@ -106,7 +129,7 @@ public class GameServer {
                 players.remove(getPlayer(playerID));
                 System.out.println("Socket closed for player " + playerID);
                 playerCount--;
-
+                //this removes the "top" player id
             }
         }
     }
@@ -123,28 +146,15 @@ public class GameServer {
         public void run() {
             try {
                 while(true) {
-                    Player cur = getPlayer(playerID);
-//                    for(int i =0; i < players.size(); i++ ) {
-//                        if(i != playerID && cur != null) {
-//                            dataOUT.writeInt(i);
-//                            dataOUT.writeFloat(cur.getX());
-//                            dataOUT.writeFloat(cur.getY());
-//                            System.out.println("X: " + cur.getX() + " Y: " + cur.getY());
-//                            dataOUT.flush();
-//                        }
-//                    }
-
-                    for(Player p: players) {
-                        if(p != cur && cur != null) {
-                            dataOUT.writeInt(p.getID());
-                            dataOUT.writeFloat(p.getX());
-                            System.out.println("Player: " + p.getID() + " X: " + cur.getX() + " Y: " + cur.getY());
-                            dataOUT.writeFloat(p.getY());
-                            dataOUT.flush();
-                        }
+                    dataOUT.writeInt(LotsOfYouGame.STATE_PACKET);
+                    dataOUT.writeInt(players.size());
+                    for(Player p : players) {
+                        dataOUT.writeInt(p.getID());
+                        PlayerState st = p.getPlayerState();
+                        st.write(dataOUT);
                     }
                     try {
-                        Thread.sleep(25);
+                        Thread.sleep(10);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
@@ -166,7 +176,8 @@ public class GameServer {
 
     public static void main(String[] args) {
         GameServer gs = new GameServer();
-        gs.acceptConnection();
+        gs.listenForConnections();
+        gs.loop();
     }
 
 }
