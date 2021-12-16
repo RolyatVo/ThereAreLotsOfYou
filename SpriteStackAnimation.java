@@ -44,7 +44,7 @@ public class SpriteStackAnimation extends Animation {
 
     public void setRotation(float rotation) {
         this.rotation = rotation;
-        frames.forEach(f -> f.spritestack.setRotation(this.rotation) );
+        getCurrentSSFrame().spritestack.setRotation(this.rotation);
     }
 
     public void update(int delta)  {
