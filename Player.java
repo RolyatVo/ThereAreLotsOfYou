@@ -34,7 +34,7 @@ public class Player {
     private int ID;
 
     SpriteStack playerSprite;
-
+    Animations animations;
     SpriteStackAnimation currentAnimation;
 
     PlayerInput input;
@@ -47,7 +47,7 @@ public class Player {
     private final float moveRatio = 0.08f;
 
     private float actionTime;
-    private final float rollTimeMax = 0.2f;
+    private final float rollTimeMax = 0.5f;
     private final float attackTimeMax = 0.5f;
     private final float attackOffset = 5.0f;
     private final float attackRadius = 10.0f;
@@ -81,8 +81,8 @@ public class Player {
         keyPress = -1;
         ID = -99;
     }
-    public Player(SpriteStackAnimation sprite, float x, float y, float width, float height) {
-        currentAnimation = sprite;
+    public Player(Animations animations, float x, float y, float width, float height) {
+
         this.x = x;
         this.y = y;
         this.width = width;
@@ -94,6 +94,8 @@ public class Player {
         this.rollDir = new Vector(0, 0);
         this.input = new PlayerInput();
         this.state = State.FREE;
+        this.animations = animations;
+        currentAnimation = animations.walkingAnimation;
         keyPress = -1;
         ID = -99;
     }
@@ -120,7 +122,6 @@ public class Player {
 
     void update(float delta) {
         float deltaSeconds = delta / 1000;
-
 
         switch (state) {
             case FREE -> free(deltaSeconds);
@@ -174,7 +175,6 @@ public class Player {
             state = State.ATTACKING;
         } else if (input.roll && (xDir != 0 || yDir != 0)) {
             rollDir = new Vector(xDir, yDir);
-
             actionTime = 0;
             state = State.ROLLING;
         }
@@ -198,7 +198,7 @@ public class Player {
         x += transX;
         y += transY;
 
-        if(actionTime > rollTimeMax) state = State.FREE;
+        if(actionTime > rollTimeMax) { state = State.FREE; }
         actionTime += deltaSeconds;
     }
 
@@ -275,6 +275,15 @@ public class Player {
         actionTime = targetState.actionTime;
         rollDir = new Vector(targetState.rollX, targetState.rollY);
         state = State.values()[targetState.state];
+        if(state == State.FREE) {
+            currentAnimation = animations.walkingAnimation;
+            currentAnimation.setRotation(lookRotation);
+        }
+        else if(state == State.ROLLING) {
+            currentAnimation = animations.rollingAnimation;
+            animations.rollingAnimation.setRotation((float) rollDir.getRotation());
+            this.lookRotation = (float) rollDir.getRotation();
+        }
     }
 
     public void drawDebug(Graphics g, Camera cam) {

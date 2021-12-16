@@ -15,7 +15,7 @@ public class StartState extends BasicGameState {
     UI_interface ui;
     SpriteStack playerSprite;
 
-    SpriteStackAnimation playerAnimated;
+   // SpriteStackAnimation playerAnimated;
     Player player;
 
     PlayerInput playerInput;
@@ -45,7 +45,7 @@ public class StartState extends BasicGameState {
 
 
 
-        playerAnimated = animations.walkingAnimation;
+        //playerAnimated = animations.walkingAnimation;
 
 
 
@@ -100,17 +100,18 @@ public class StartState extends BasicGameState {
         // System.out.println("Updating...");
         synchronized (playerManager) {
             Player player = playerManager.getPlayer(playerID);
+
             if (player != null) {
                 playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
                 ui.update(player);
-
-                if(playerInput.down || playerInput.up || playerInput.left || playerInput.right) {
+                if( (playerInput.down || playerInput.up || playerInput.left || playerInput.right))  {
                     player.currentAnimation.play();
                     player.currentAnimation.update(delta);
                 }
                 else {
                     player.currentAnimation.stop();
                     player.currentAnimation.setFrame(0);
+                    player.animations.rollingAnimation.setFrame(0);
                 }
                 Collectible.getCollectibles().forEach(c -> c.update(delta));
 
@@ -174,7 +175,7 @@ public class StartState extends BasicGameState {
                                 p.setPlayerState(st);
                             }
                             else {
-                                p = new Player(playerAnimated, 0, 0, 6, 7);
+                                p = new Player(animations, 0, 0, 6, 7);
                                 p.setID(playerId);
                                 playerManager.addPlayer(p, playerId);
                             }

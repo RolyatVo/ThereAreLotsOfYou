@@ -4,27 +4,22 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.SlickException;
 
 public class Animations {
-    SpriteStack[] walking = new SpriteStack[7];
     SpriteStackAnimation walkingAnimation;
 
-    SpriteStack[] armorFrames = new SpriteStack[8];
     SpriteStackAnimation armorAnimation;
 
-    SpriteStack[] rollingFrames = new SpriteStack[9];
     SpriteStackAnimation rollingAnimation;
 
-    SpriteStack[] rollingWithSwordFrames = new SpriteStack[9];
     SpriteStackAnimation rollingSwordAnimation;
 
-    SpriteStack[] swordFrames = new SpriteStack[6];
     SpriteStackAnimation swordAnimation;
 
-    SpriteStack[] walkingSword = new SpriteStack[6];
     SpriteStackAnimation walkingWithSwordAnimation;
 
 
     public Animations(Camera cam) throws SlickException {
 
+        SpriteStack[] walking = new SpriteStack[7];
         walking[0] = new SpriteStack(LotsOfYouGame.WALKING_RSC_1, 6, 7, cam);
         walking[1] = new SpriteStack(LotsOfYouGame.WALKING_RSC_2, 6, 7, cam);
         walking[2] = new SpriteStack(LotsOfYouGame.WALKING_RSC_3, 6, 7, cam);
@@ -33,6 +28,7 @@ public class Animations {
         walking[5] = new SpriteStack(LotsOfYouGame.WALKING_RSC_6, 6, 7, cam);
         walkingAnimation = new SpriteStackAnimation(walking, 150);
 
+        SpriteStack[] armorFrames = new SpriteStack[8];
         armorFrames[0] = new SpriteStack(LotsOfYouGame.ARMOR_RSC_0, 10, 7, cam);
         armorFrames[1] = new SpriteStack(LotsOfYouGame.ARMOR_RSC_1, 10, 7, cam);
         armorFrames[2] = new SpriteStack(LotsOfYouGame.ARMOR_RSC_2, 10, 7, cam);
@@ -43,6 +39,7 @@ public class Animations {
         armorFrames[7] = new SpriteStack(LotsOfYouGame.ARMOR_RSC_7, 10, 7, cam);
         armorAnimation = new SpriteStackAnimation(armorFrames, 150);
 
+        SpriteStack[] rollingFrames = new SpriteStack[9];
         rollingFrames[0] = new SpriteStack(LotsOfYouGame.ROLLING_RSC_0, 10, 11, cam);
         rollingFrames[1] = new SpriteStack(LotsOfYouGame.ROLLING_RSC_1, 10, 11, cam);
         rollingFrames[2] = new SpriteStack(LotsOfYouGame.ROLLING_RSC_2, 10, 11, cam);
@@ -52,8 +49,9 @@ public class Animations {
         rollingFrames[6] = new SpriteStack(LotsOfYouGame.ROLLING_RSC_6, 10, 11, cam);
         rollingFrames[7] = new SpriteStack(LotsOfYouGame.ROLLING_RSC_7, 10, 11, cam);
         rollingFrames[8] = new SpriteStack(LotsOfYouGame.ROLLING_RSC_8, 10, 11, cam);
-        rollingAnimation = new SpriteStackAnimation(rollingFrames, 150);
+        rollingAnimation = new SpriteStackAnimation(rollingFrames, 65);
 
+        SpriteStack[] rollingWithSwordFrames = new SpriteStack[9];
         rollingWithSwordFrames[0] = new SpriteStack(LotsOfYouGame.ROLLING_SWORD_RSC_0, 10, 11, cam);
         rollingWithSwordFrames[1] = new SpriteStack(LotsOfYouGame.ROLLING_SWORD_RSC_1, 10, 11, cam);
         rollingWithSwordFrames[2] = new SpriteStack(LotsOfYouGame.ROLLING_SWORD_RSC_2, 10, 11, cam);
@@ -65,6 +63,7 @@ public class Animations {
         rollingWithSwordFrames[8] = new SpriteStack(LotsOfYouGame.ROLLING_SWORD_RSC_8, 10, 11, cam);
         rollingSwordAnimation = new SpriteStackAnimation(rollingWithSwordFrames, 150);
 
+        SpriteStack[] swordFrames = new SpriteStack[6];
         swordFrames[0] = new SpriteStack(LotsOfYouGame.SWORD_RSC_0, 10, 9, cam);
         swordFrames[1] = new SpriteStack(LotsOfYouGame.SWORD_RSC_1, 10, 9, cam);
         swordFrames[2] = new SpriteStack(LotsOfYouGame.SWORD_RSC_2, 11, 9, cam);
@@ -73,6 +72,7 @@ public class Animations {
         swordFrames[5] = new SpriteStack(LotsOfYouGame.SWORD_RSC_5, 10, 9, cam);
         swordAnimation = new SpriteStackAnimation(swordFrames, 100);
 
+        SpriteStack[] walkingSword = new SpriteStack[6];
         walkingSword[0] = new SpriteStack(LotsOfYouGame.WALKING_SWORD_RSC_0, 10, 11, cam);
         walkingSword[1] = new SpriteStack(LotsOfYouGame.WALKING_SWORD_RSC_1, 10, 11, cam);
         walkingSword[2] = new SpriteStack(LotsOfYouGame.WALKING_SWORD_RSC_2, 10, 11, cam);
