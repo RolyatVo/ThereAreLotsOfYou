@@ -194,7 +194,15 @@ public class StartState extends BasicGameState {
                         int id = dataIN.readInt();
                         Player p = new Player(animations, 0, 0);
                         p.setID(id);
-                        playerManager.addPlayer(p, id);
+                        synchronized (playerManager) {
+                            playerManager.addPlayer(p, id);
+                        }
+                    } else if (packetType == LotsOfYouGame.QUIT_PACKET) {
+                        int id = dataIN.readInt();
+                        synchronized (playerManager) {
+                            System.out.println("Removing player: " + id);
+                            playerManager.removePlayer(id);
+                        }
                     }
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }

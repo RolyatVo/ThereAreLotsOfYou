@@ -26,8 +26,6 @@ public class minimap {
         float pixelX = playerX / 16 - 16;
         float pixelY = playerY / 16 - 16;
 
-        System.out.println(pixelX + ", " + pixelY);
-
         ResourceManager.getImage(LotsOfYouGame.MINIMAP).draw(x, y);
         ResourceManager.getImage(LotsOfYouGame.PLAYER_MARKER).draw(x + pixelX, y + pixelY);
     }

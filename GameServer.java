@@ -19,7 +19,7 @@ public class GameServer {
     private ServerSocket serverSocket;
     private ArrayList<Socket> playerSockets;
     private ArrayList<ReadClient> playersReadRunnable;
-    private ArrayList<WriteClient> playersWriteRunnable;
+    private final ArrayList<WriteClient> playersWriteRunnable;
     private final ArrayList<Integer> removedCollectibles = new ArrayList<>();
 
     private final PlayerManager players;
@@ -76,13 +76,19 @@ public class GameServer {
                     ReadClient rc = new ReadClient(playerCount, serverIn);
                     WriteClient wc = new WriteClient(playerCount, serverOut);
 
-                    for(WriteClient wr : playersWriteRunnable) {
-                        wr.queueNewPlayer(playerCount);
+                    synchronized (playersWriteRunnable) {
+                        for (WriteClient wr : playersWriteRunnable) {
+                            wr.queueNewPlayer(playerCount);
+                        }
                     }
 
                     playerSockets.add(server);
-                    playersWriteRunnable.add(wc);
-                    playersReadRunnable.add(rc);
+                    synchronized (playersWriteRunnable) {
+                        playersWriteRunnable.add(wc);
+                    }
+                    synchronized (playersReadRunnable) {
+                        playersReadRunnable.add(rc);
+                    }
 
                     synchronized (players) {
                         players.addPlayer(new Player(0, 0, playerCount), playerCount);
@@ -103,12 +109,18 @@ public class GameServer {
                         }
                     }
 
-                    Thread readClients = new Thread(playersReadRunnable.get(playersReadRunnable.size()-1));
+                    synchronized (playersWriteRunnable) {
+                        synchronized (playersReadRunnable) {
+                            Thread readClients = new Thread(playersReadRunnable.get(playersReadRunnable.size() - 1));
 
-                    Thread writeClients = new Thread(playersWriteRunnable.get(playersWriteRunnable.size()-1));
 
-                    readClients.start();
-                    writeClients.start();
+                            Thread writeClients = new Thread(playersWriteRunnable.get(playersWriteRunnable.size() - 1));
+
+                            readClients.start();
+                            writeClients.start();
+                        }
+                    }
+
 
                 }
 
@@ -134,30 +146,40 @@ public class GameServer {
                     if(r.dead) toRemoveReads.add(r);
                 }
 
-                for(WriteClient e : playersWriteRunnable) {
-                    if(e.dead) toRemoveWrites.add(e);
+                synchronized (playersReadRunnable) {
+                    for(ReadClient r : playersReadRunnable) {
+                        if(r.dead) toRemoveReads.add(r);
+                    }
+
+                    for (ReadClient toRemove : toRemoveReads) {
+                        playersReadRunnable.remove(toRemove);
+                        System.out.println("Removed reader.");
+                    }
                 }
 
-                for(ReadClient toRemove : toRemoveReads) {
-                    playersReadRunnable.remove(toRemove);
-                    System.out.println("Removed reader.");
-                }
+                synchronized (playersWriteRunnable) {
+                    for(WriteClient e : playersWriteRunnable) {
+                        if(e.dead) toRemoveWrites.add(e);
+                    }
 
-                for(WriteClient toRemove : toRemoveWrites) {
-                    playersWriteRunnable.remove(toRemove);
-                    System.out.println("Removed writer");
+                    for (WriteClient toRemove : toRemoveWrites) {
+                        playersWriteRunnable.remove(toRemove);
+                        System.out.println("Removed writer");
+                    }
                 }
 
                 switch (state) {
                     case WAITING:
-                        if(playersWriteRunnable.size() >= minimumPlayerCount) {
-                            ++waitTick;
-                            if (waitTick == waitTickMax) {
+                        synchronized (playersWriteRunnable) {
+                            if (playersWriteRunnable.size() >= minimumPlayerCount) {
+                                ++waitTick;
+                                if (waitTick == waitTickMax) {
+                                    waitTick = 0;
+                                    state = GameServerState.RUNNING;
+                                }
+                            } else {
                                 waitTick = 0;
-                                state = GameServerState.RUNNING;
                             }
-                        } else {
-                            waitTick = 0;
                         }
                         synchronized (players) {
                             players.getPlayers().forEach(Player::waitForOthers);
@@ -178,13 +200,18 @@ public class GameServer {
                                     }
                                 }
 
-                                for (int i : removedCollectibles) {
-                                    Collectible.removeCollectible(i);
+                                synchronized (removedCollectibles) {
+                                    for (int i : removedCollectibles) {
+                                        Collectible.removeCollectible(i);
+                                    }
+
+                                    synchronized (playersWriteRunnable) {
+                                        for (WriteClient writeClient : playersWriteRunnable) {
+                                            writeClient.copyRemoveCollectibles(removedCollectibles);
+                                        }
+                                    }
+                                    removedCollectibles.clear();
                                 }
-                                for(WriteClient writeClient : playersWriteRunnable) {
-                                    writeClient.copyRemoveCollectibles(removedCollectibles);
-                                }
-                                removedCollectibles.clear();
 
                                 for (Player other : players.getPlayers()) {
                                     if (other != p && other.canHit(p) && p.hitBy(other)) {
@@ -218,8 +245,10 @@ public class GameServer {
 
         Level.InitLevel("LotsOfYou/src/lotsofyou/levels/test.txt");
 
-        for(WriteClient write : playersWriteRunnable) {
-            write.setShouldRestart();
+        synchronized (playersWriteRunnable) {
+            for (WriteClient write : playersWriteRunnable) {
+                write.setShouldRestart();
+            }
         }
     }
 
@@ -271,10 +300,18 @@ public class GameServer {
 
             } catch(IOException ex) {
 //                ex.printStackTrace();
-                players.removePlayer(playerID);
+                synchronized (players) {
+                    players.removePlayer(playerID);
+                }
+
                 System.out.println("Socket closed for player " + playerID);
                 playerCount--;
-                //this removes the "top" player id
+
+                synchronized (playersWriteRunnable) {
+                    for(WriteClient w : playersWriteRunnable) {
+                        w.queueRemovedPlayer(playerID);
+                    }
+                }
             }
             dead = true;
         }
@@ -283,6 +320,8 @@ public class GameServer {
         private int playerID;
         private DataOutputStream dataOUT;
         private final ArrayList<Integer> removeCollectiblesCopy;
+        private final ArrayList<Integer> removedPlayersQueue;
+
         private final LinkedList<String> messageQueue;
         private final ArrayList<Integer> newPlayers;
 
@@ -300,11 +339,18 @@ public class GameServer {
             messageQueue = new LinkedList<>();
             newPlayers = new ArrayList<>();
             shouldRestart = false;
+            removedPlayersQueue = new ArrayList<>();
         }
 
         public void queueNewPlayer(int pid) {
             synchronized (newPlayers) {
                 newPlayers.add(pid);
+            }
+        }
+
+        public void queueRemovedPlayer(int pid) {
+            synchronized (removedPlayersQueue) {
+                removedPlayersQueue.add(pid);
             }
         }
 
@@ -349,6 +395,14 @@ public class GameServer {
                             dataOUT.writeInt(i);
                         }
                         newPlayers.clear();
+                    }
+
+                    synchronized (removedPlayersQueue) {
+                        for(int i : removedPlayersQueue) {
+                            dataOUT.writeInt(LotsOfYouGame.QUIT_PACKET);
+                            dataOUT.writeInt(i);
+                        }
+                        removedPlayersQueue.clear();
                     }
 
                     int secondsRemaining = (waitTickMax - waitTick) / 60;
