@@ -114,6 +114,12 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String WALKING_SWORD_RSC_4 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME4.png";
 	public static final String WALKING_SWORD_RSC_5 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME5.png";
 
+	public static final String ATTACK_RSC_0 =  "lotsofyou/resource/Animations/Attack/Player_attack_FRAME0.png";
+	public static final String ATTACK_RSC_1 =  "lotsofyou/resource/Animations/Attack/Player_attack_FRAME1.png";
+	public static final String ATTACK_RSC_2 =  "lotsofyou/resource/Animations/Attack/Player_attack_FRAME2.png";
+	public static final String ATTACK_RSC_3 =  "lotsofyou/resource/Animations/Attack/Player_attack_FRAME3.png";
+	public static final String ATTACK_RSC_4 =  "lotsofyou/resource/Animations/Attack/Player_attack_FRAME4.png";
+
 	public final int ScreenWidth;
 	public final int ScreenHeight;
 	public static final int INPUT_PACKET = 0;
@@ -190,6 +196,11 @@ public class LotsOfYouGame extends StateBasedGame {
 		//Player Walking with sword
 		for(int i=0; i < 6; i++) {
 			ResourceManager.loadImage("lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME" + i + ".png");
+		}
+
+		//Attack
+		for(int i=0; i < 5; i++) {
+			ResourceManager.loadImage("lotsofyou/resource/Animations/Attack/Player_attack_FRAME" + i + ".png");
 		}
 
 
