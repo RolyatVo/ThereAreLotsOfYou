@@ -2,6 +2,9 @@ package lotsofyou;
 
 import jig.Vector;
 import org.newdawn.slick.*;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.Graphics;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -9,6 +12,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StartState extends BasicGameState {
 
@@ -23,7 +28,6 @@ public class StartState extends BasicGameState {
     private Animations animations;
 
     final PlayerManager playerManager = new PlayerManager();
-    SpriteStack tree;
     Camera cam = new Camera(960, 540);
     int frame = 0;
 
@@ -35,8 +39,6 @@ public class StartState extends BasicGameState {
 
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
-        //box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
-        tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
 
         playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
 
@@ -46,6 +48,9 @@ public class StartState extends BasicGameState {
         playerInput = new PlayerInput();
         cam.setScale(3);
         serverConnect();
+
+        Level.InitLevel("LotsOfYou/src/lotsofyou/levels/test.txt", cam);
+
         Collectible.setCollectibleRenderCam(cam);
     }
 
@@ -61,8 +66,6 @@ public class StartState extends BasicGameState {
         g.setBackground(new Color(83, 124, 68));
 
         ++frame;
-
-        tree.draw(32, 32);
         synchronized (playerManager) {
             for (Player p : playerManager.getPlayers()) {
                 p.render();
@@ -77,6 +80,8 @@ public class StartState extends BasicGameState {
                 c.render();
             }
         }
+
+        Level.render();
     }
 
     @Override
@@ -159,7 +164,7 @@ public class StartState extends BasicGameState {
                                 p.setPlayerState(st);
                             }
                             else {
-                                p = new Player(animations, 0, 0, 6, 7);
+                                p = new Player(animations, 0, 0);
                                 p.setID(playerId);
                                 playerManager.addPlayer(p, playerId);
                             }
