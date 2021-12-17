@@ -13,12 +13,12 @@ public class UI_interface {
     private armorSection armorSection;
     private weaponSection weaponSection;
 
-    public UI_interface(Player player, int screenWidth, int screenHeight) {
+    public UI_interface(int screenWidth, int screenHeight) {
         this.bottomRow = screenHeight * 0.9f - 15;
         this.left = 20;
 
 
-        healthBar = new healthBar(player.getHealthNUM(), 250, 30);
+        healthBar = new healthBar(100, 250, 30);
         armorSection = new armorSection(200, 30);
         weaponSection = new weaponSection();
     }
