@@ -421,7 +421,7 @@ public class GameServer {
                     }
 
                     try {
-                        Thread.sleep(7);
+                        Thread.sleep(1);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
