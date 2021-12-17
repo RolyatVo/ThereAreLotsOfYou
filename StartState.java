@@ -1,8 +1,6 @@
 package lotsofyou;
 
 import jig.Vector;
-import org.lwjgl.examples.spaceinvaders.Sprite;
-import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -11,23 +9,23 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.security.Key;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class StartState extends BasicGameState {
 
     UI_interface ui;
     SpriteStack playerSprite;
+
+   // SpriteStackAnimation playerAnimated;
     Player player;
-    ArrayList<Player> players;
+
+    PlayerInput playerInput;
+
+    private Animations animations;
+
+    final PlayerManager playerManager = new PlayerManager();
     SpriteStack tree;
     Camera cam = new Camera(960, 540);
     int frame = 0;
-
-
-    float posX = 960.0f / 2;
-    float posY = 540.0f / 2;
 
 
     @Override
@@ -39,53 +37,75 @@ public class StartState extends BasicGameState {
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
         //box = new SpriteStack(LotsOfYouGame.TEST_BOX, 16, 16, cam);
         tree = new SpriteStack(LotsOfYouGame.TEST_TREE, 64, 64, cam);
-        playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 64, 64, cam);
 
-        players = new ArrayList<>();
+        playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
 
-        player = new Player(playerSprite, posX, posY, 16, 16);
-        ui = new UI_interface(player, 960, 540);
+        animations = new Animations(cam);
+
+        ui = new UI_interface( 960, 540);
+        playerInput = new PlayerInput();
         cam.setScale(3);
         serverConnect();
+        Collectible.setCollectibleRenderCam(cam);
     }
 
 
     @Override
     public void enter(GameContainer container, StateBasedGame game) {
-
+        //Collectible.addCollectible(Collectible.Type.ARMOR, new Vector(-64, -64));
     }
 
     @Override
     public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
+        // System.out.println("Rendering...");
         g.setBackground(new Color(83, 124, 68));
 
         ++frame;
 
+        tree.draw(32, 32);
+        synchronized (playerManager) {
+            for (Player p : playerManager.getPlayers()) {
+                p.render();
+//                p.drawDebug(g, cam);
+            }
+        }
 
-        tree.draw(posX + 32, posY + 32);
-        player.render();
-//        if(playerCoords[enemyID] != null)
-//            enemyPlayer.render(playerCoords[enemyID].getX(), playerCoords[enemyID].getY());
-
-
-        players.forEach(p -> p.render(p.getX(), p.getY()));
         ui.render(g);
 
+        synchronized (Collectible.getCollectibles()) {
+            for(Collectible c : Collectible.getCollectibles()) {
+                c.render();
+            }
+        }
     }
 
     @Override
     public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
-        player.update(delta, container.getInput(), cam);
-        cam.setTargetPos(player.getX(), player.getY());
-        cam.update(container.getInput());
-        ui.update(player);
-    }
+//            if(playerInput.down || playerInput.up || playerInput.left || playerInput.right) {
+//                player.playerAnimation.play();
+//                player.playerAnimation.update(delta);
+//            }
+//            else {
+//                player.playerAnimation.stop();
+//                player.playerAnimation.setFrame(0);
+//            }
 
-    private Player getPlayer(int id) {
-        for(Player p : players) {
-            if(p.getID() == id) return p;
+        // System.out.println("Updating...");
+        synchronized (playerManager) {
+            Player player = playerManager.getPlayer(playerID);
+            if (player != null) {
+                player.updateAnimation(delta);
+
+                playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
+                ui.update(player);
+
+                Collectible.getCollectibles().forEach(c -> c.update(delta));
+                cam.setTargetPos(player.getX(), player.getY());
+                cam.update(container.getInput(), player);
+            } else {
+                playerInput.update(container.getInput(), cam, new Vector(0, 0));
+            }
         }
-        return null;
     }
 
     private Socket socket;
@@ -100,10 +120,10 @@ public class StartState extends BasicGameState {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
             playerID = in.readInt();
-            System.out.println("You are player #" + playerID);
+            // System.out.println("You are player #" + playerID);
 
             rsRunnable = new ReadServer(in);
-            wsRunnable = new WriteServer(out);
+            wsRunnable = new WriteServer(out, playerInput);
 
             Thread readServer = new Thread(rsRunnable);
             Thread writeServer = new Thread(wsRunnable);
@@ -121,35 +141,42 @@ public class StartState extends BasicGameState {
 
         public ReadServer (DataInputStream in) {
             dataIN = in;
-            System.out.println("Read to Server runnable created!!");
-
-
+            System.out.println("Read from Server runnable created!!");
         }
         public void run() {
             try {
                 while(true) {
-                    //TODO:  Should go through and update each enemy get server to send each
-                    //TODO: Make it so server sends "commands" or prompts so that we know what information is about to
-                    // come through
-                    int enemyID = dataIN.readInt();
-                    Player enemy = getPlayer(enemyID);
-                    if(enemy  != null) {
-                        float xpos = dataIN.readFloat();
-                        float ypos = dataIN.readFloat();
-                        enemy.setX(xpos);
-                        enemy.setY(ypos);
-
+                    int packetType = dataIN.readInt();
+                    if(packetType == LotsOfYouGame.STATE_PACKET) {
+                        // System.out.println("Applying states");
+                        int count = dataIN.readInt();
+                        for(int i = 0; i != count; ++i) {
+                            int playerId = dataIN.readInt();
+                            Player p = playerManager.getPlayer(playerId);
+                            if(p != null) {
+                                PlayerState st = new PlayerState();
+                                st.read(dataIN);
+                                p.setPlayerState(st);
+                            }
+                            else {
+                                p = new Player(animations, 0, 0, 6, 7);
+                                p.setID(playerId);
+                                playerManager.addPlayer(p, playerId);
+                            }
+                        }
+                    } else if (packetType == LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET) {
+                        int size = dataIN.readInt();
+                        synchronized (Collectible.getCollectibles()) {
+                            for (int i = 0; i != size; ++i) {
+                                Collectible.removeCollectible(dataIN.readInt());
+                            }
+                        }
                     }
-                    else {
-                        enemy = new Player(playerSprite, 0, 0, 16, 16);
-                        enemy.setID(enemyID);
-                        players.add(enemy);
-
-                    }
+                    Thread.sleep(10);
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }
 
-            } catch (IOException ex) {
+            } catch (IOException | InterruptedException ex) {
                 //TODO : set up enemies here on client side
                 ex.printStackTrace();
             }
@@ -158,30 +185,21 @@ public class StartState extends BasicGameState {
     }
     private class WriteServer implements Runnable {
         private DataOutputStream dataOUT;
+        private PlayerInput input;
 
-        public WriteServer (DataOutputStream out) {
+        public WriteServer (DataOutputStream out, PlayerInput input) {
             dataOUT = out;
+            this.input = input;
             System.out.println("Write to Server runnable created!!");
 
         }
         public void run() {
             try {
                 while(true) {
-                    //TODO Maybe try to get client send a command or response so that server knows what to do
-                    dataOUT.writeFloat(player.getX());
-                    dataOUT.writeFloat(player.getY());
-                    dataOUT.flush();
-                    if (player.getKeyPress() != -1) {
-                        System.out.println("Player Pressed: " + player.getKeyPress());
+                    if(input.pollUpdated()) {
+                        dataOUT.writeInt(LotsOfYouGame.INPUT_PACKET);
+                        input.send(dataOUT);
                     }
-//          System.out.println("X: " + player.getX() +" Y: " + player.getY());
-                    try {
-                        Thread.sleep(25);
-
-                    } catch (InterruptedException ex) {
-                        ex.fillInStackTrace();
-                    }
-
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
