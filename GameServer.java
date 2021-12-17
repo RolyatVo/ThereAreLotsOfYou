@@ -13,6 +13,7 @@ public class GameServer {
 
     private int playerCount;
     private final int playerCountMax;
+    int prevAnimFrame = 0;
 
     private ServerSocket serverSocket;
     private ArrayList<Socket> playerSockets;

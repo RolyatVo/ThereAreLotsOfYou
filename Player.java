@@ -1,5 +1,6 @@
 package lotsofyou;
 
+import jig.ResourceManager;
 import jig.Vector;
 import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.lwjgl.input.Keyboard;
@@ -13,6 +14,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Player {
+
+    int prevArmor = 0;
+    int prevSword = 0;
+    int prevHealth = 100;
 
     //the player needs to propogate the keypresses, and their look rotation to the server
 
@@ -337,6 +342,8 @@ public class Player {
             } else if (state == State.ATTACKING) {
                 if(swordLevel == 0) currentAnimation = animations.clapAttackAnimation;
                 if(swordLevel == 1) currentAnimation = animations.attackAnimation;
+
+                ResourceManager.getSound(LotsOfYouGame.SWING_SND).play();
             }
             currentAnimation.setFrame(0);
         }
@@ -345,6 +352,10 @@ public class Player {
             if (xVel != 0 || yVel != 0) {
                 if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
                 if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
+
+//                if(currentAnimation.getFrame() % 3 == 0) {
+//                    ResourceManager.getSound(LotsOfYouGame.STEP_SND).play();
+//                }
             } else {
                 currentAnimation = animations.idleAnimation;
             }
@@ -360,6 +371,22 @@ public class Player {
 
         currentAnimation.draw(x - currentAnimation.getFrameWidth() / 2 ,y - currentAnimation.getFrameHeight() / 2);
         prevRenderState = state;
+
+        if(healthNUM < prevHealth) {
+            ResourceManager.getSound(LotsOfYouGame.HURT_SND).play();
+        }
+
+        if(armorPlates > prevArmor) {
+            ResourceManager.getSound(LotsOfYouGame.ARMOR_POWERUP_SND).play();
+        }
+
+        if(swordLevel > prevSword) {
+            ResourceManager.getSound(LotsOfYouGame.POWERUP_SND).play();
+        }
+
+        prevHealth = healthNUM;
+        prevArmor = armorPlates;
+        prevSword = swordLevel;
     }
 
     public PlayerState getPlayerState() {
