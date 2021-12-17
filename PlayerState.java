@@ -17,6 +17,7 @@ public class PlayerState {
     float attackRotation;
     float targetLookRotation;
     int health;
+    int swordLevel;
     int armorPlates;
     float actionTime;
     int rollX;
@@ -26,7 +27,7 @@ public class PlayerState {
     public PlayerState() {};
 
     public PlayerState(float x_, float y_, float xVel, float yVel, float prevXVel, float prevYVel,
-                       float lookRotation_, float attackRotation_, float targetLookRotation_, int health_, int armorPlates_,
+                       float lookRotation_, float attackRotation_, float targetLookRotation_, int health_, int swordLevel_, int armorPlates_,
                        float actionTime_, Vector rollDir, Player.State state_) {
         this.x = x_;
         this.y = y_;
@@ -38,6 +39,7 @@ public class PlayerState {
         this.attackRotation = attackRotation_;
         this.targetLookRotation = targetLookRotation_;
         this.health = health_;
+        this.swordLevel = swordLevel_;
         this.armorPlates = armorPlates_;
         this.actionTime = actionTime_;
         this.rollX = (int)rollDir.getX();
@@ -58,6 +60,7 @@ public class PlayerState {
         dataOutputStream.writeFloat(targetLookRotation);
 
         dataOutputStream.writeInt(health);
+        dataOutputStream.writeInt(swordLevel);
         dataOutputStream.writeInt(armorPlates);
 
         dataOutputStream.writeFloat(actionTime);
@@ -80,6 +83,7 @@ public class PlayerState {
         targetLookRotation = dataInputStream.readFloat();
 
         health = dataInputStream.readInt();
+        swordLevel = dataInputStream.readInt();
         armorPlates = dataInputStream.readInt();
 
         actionTime = dataInputStream.readFloat();

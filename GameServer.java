@@ -95,24 +95,26 @@ public class GameServer {
                         // System.out.println("Updating player " + p.getID());
                         p.update(1000.0f / 60, Level.getTilemap());
 
-                        synchronized (removedCollectibles) {
-                            for(Collectible c : Collectible.getCollectibles()) {
-                                if(c.intersects(new Vector(p.getX(), p.getY()))) {
-                                    p.collect(c);
-                                    removedCollectibles.add(c.getId());
-                                }
-                            }
-
-                            for (int i : removedCollectibles) {
-                                Collectible.removeCollectible(i);
+                        for(Collectible c : Collectible.getCollectibles()) {
+                            if(c.intersects(new Vector(p.getX(), p.getY())) && p.canCollect(c)) {
+                                p.collect(c);
+                                removedCollectibles.add(c.getId());
                             }
                         }
+
+                        for (int i : removedCollectibles) {
+                            Collectible.removeCollectible(i);
+                        }
+                        for(WriteClient writeClient : playersWriteRunnable) {
+                            writeClient.copyRemoveCollectibles(removedCollectibles);
+                        }
+                        removedCollectibles.clear();
 
                         for (Player other : players.getPlayers()) {
                             if (other != p && other.canHit(p) && p.hitBy(other)) {
                                 System.out.println("Hit?");
                                 other.hit(p);
-                                p.damage(10);
+                                p.damage(other.getDamage());
                             }
                         }
                     }
@@ -164,10 +166,21 @@ public class GameServer {
     private class WriteClient implements Runnable {
         private int playerID;
         private DataOutputStream dataOUT;
+        private final ArrayList<Integer> removeCollectiblesCopy;
+
+
+
         public WriteClient(int pid, DataOutputStream out) {
             playerID = pid;
             dataOUT = out;
             System.out.println("Write: " + playerID + " Runnable created");
+            removeCollectiblesCopy = new ArrayList<>();
+        }
+
+        public void copyRemoveCollectibles(ArrayList<Integer> removeCollectibles) {
+            synchronized (removeCollectiblesCopy) {
+                removeCollectiblesCopy.addAll(removeCollectibles);
+            }
         }
 
         @Override
@@ -182,14 +195,15 @@ public class GameServer {
                         st.write(dataOUT);
                     }
 
-                    synchronized (removedCollectibles) {
-                        if(!removedCollectibles.isEmpty()) {
+                    synchronized (removeCollectiblesCopy) {
+                        if(!removeCollectiblesCopy.isEmpty()) {
                             dataOUT.writeInt(LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET);
-                            dataOUT.writeInt(removedCollectibles.size());
-                            for(int i : removedCollectibles) {
+                            dataOUT.writeInt(removeCollectiblesCopy.size());
+                            for(int i : removeCollectiblesCopy) {
                                 dataOUT.writeInt(i);
                             }
                         }
+                        removeCollectiblesCopy.clear();
                     }
                     try {
                         Thread.sleep(7);

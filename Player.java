@@ -24,7 +24,7 @@ public class Player {
     private float yVel;
 
     private static final float moveSpeed = 50.0f;
-    private static final float rollSpeed = 240.0f;
+    private static final float rollSpeed = 130.0f;
 
     private static final int width = 3;
     private static final int height = 3;
@@ -39,13 +39,15 @@ public class Player {
     private int ID;
 
     SpriteStack playerSprite;
+    SpriteStack shadow;
     Animations animations;
     SpriteStackAnimation currentAnimation;
 
     PlayerInput input;
 
 
-    private int healthNUM = 50;
+    private int healthNUM = 100;
+    private int swordLevel = 0;
     private int armorPlates = 0;
 
     private static final float rotationAmount = 30.0f;
@@ -54,8 +56,11 @@ public class Player {
     private float actionTime;
     private static final float rollTimeMax = 0.5f;
     private static final float attackTimeMax = 0.5f;
-    private final float attackOffset = 5.0f;
-    private final float attackRadius = 10.0f;
+    private final float clapOffset = 5.0f;
+    private final float clapRadius = 10.0f;
+
+    private final float swordOffset = 20.0f;
+    private final float swordRadius = 50.0f;
 
     private Vector rollDir;
 
@@ -70,24 +75,6 @@ public class Player {
 
     ArrayList<Integer> hitPlayers;
 
-    public Player(SpriteStack sprite, float x, float y) {
-        playerSprite = sprite;
-        this.x = x;
-        this.y = y;
-        this.lookRotation = 0;
-        this.attackRotation = 0;
-        this.targetLookRotation = 0;
-        this.actionTime = 0;
-        this.rollDir = new Vector(0, 0);
-        this.input = new PlayerInput();
-        this.state = State.FREE;
-        this.prevRenderState = this.state;
-        this.hitPlayers = new ArrayList<>();
-        this.xVel = 0;
-        this.yVel = 0;
-        keyPress = -1;
-        ID = -99;
-    }
     public Player(Animations animations, float x, float y) {
         this.x = x;
         this.y = y;
@@ -230,8 +217,6 @@ public class Player {
     private void free(float deltaSeconds) {
         targetLookRotation = input.lookRotation;
 
-        System.out.println(180.0f + " -> " + (targetLookRotation + (180.0f - lookRotation)) % 360.0f);
-
         lookRotation += moveRatio * (((targetLookRotation + (180.0f - lookRotation)) % 360.0f) - 180.0f);
 
         keyPress = -1;
@@ -262,6 +247,7 @@ public class Player {
     private void attacking(float deltaSeconds) {
         xVel = 0;
         yVel = 0;
+        attackRotation = input.attackRotation;
         if(actionTime > attackTimeMax) {
             hitPlayers.clear();
             state = State.FREE;
@@ -289,6 +275,15 @@ public class Player {
     }
 
     public boolean hitBy(Player other) {
+
+        float attackRadius = clapRadius;
+        float attackOffset = clapOffset;
+
+        if(swordLevel > 0) {
+            attackRadius = swordRadius;
+            attackOffset = swordOffset;
+        }
+
         if(other.state == State.ATTACKING && state != State.ROLLING) {
             Vector ourPos = new Vector(x, y);
             Vector otherPos = new Vector(other.x, other.y);
@@ -301,7 +296,8 @@ public class Player {
 
     public void damage(int amount) {
         state = State.FREE;
-        healthNUM -= amount;
+        if(armorPlates > 0) --armorPlates;
+        else healthNUM -= amount;
     }
 
     public int getKeyPress() { return this.keyPress; }
@@ -332,22 +328,26 @@ public class Player {
         if(state != prevRenderState) {
             if(state == State.FREE) {
                 if(xVel != 0 || yVel != 0) {
-                    currentAnimation = animations.walkingAnimation;
+                    if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
+                    if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
                 } else {
                     currentAnimation = animations.idleAnimation;
                 }
             }
             else if(state == State.ROLLING) {
-                currentAnimation = animations.rollingAnimation;
+                if(swordLevel == 0) currentAnimation = animations.rollingAnimation;
+                if(swordLevel == 1) currentAnimation = animations.rollingSwordAnimation;
             } else if (state == State.ATTACKING) {
-                currentAnimation = animations.clapAttackAnimation;
+                if(swordLevel == 0) currentAnimation = animations.clapAttackAnimation;
+                if(swordLevel == 1) currentAnimation = animations.attackAnimation;
             }
             currentAnimation.setFrame(0);
         }
 
         if(state == State.FREE) {
             if (xVel != 0 || yVel != 0) {
-                currentAnimation = animations.walkingAnimation;
+                if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
+                if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
             } else {
                 currentAnimation = animations.idleAnimation;
             }
@@ -355,7 +355,7 @@ public class Player {
             currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
         }
         else if(state == State.ATTACKING) {
-            currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
+            currentAnimation.setRotation(attackRotation);
         }
         else if (state == State.ROLLING) {
             currentAnimation.setRotation(((360 - lookRotation) + (float)rollDir.getRotation()) % 360.0f);
@@ -366,7 +366,7 @@ public class Player {
     }
 
     public PlayerState getPlayerState() {
-        return new PlayerState(x, y, xVel, yVel, prevXVel, prevYVel, lookRotation, attackRotation, targetLookRotation, healthNUM, armorPlates, actionTime, rollDir, state);
+        return new PlayerState(x, y, xVel, yVel, prevXVel, prevYVel, lookRotation, attackRotation, targetLookRotation, healthNUM, swordLevel, armorPlates, actionTime, rollDir, state);
     }
 
     public void setPlayerState(PlayerState targetState) {
@@ -381,27 +381,42 @@ public class Player {
         attackRotation = targetState.attackRotation;
         targetLookRotation = targetState.targetLookRotation;
         healthNUM = targetState.health;
+        swordLevel = targetState.swordLevel;
         armorPlates = targetState.armorPlates;
         actionTime = targetState.actionTime;
         rollDir = new Vector(targetState.rollX, targetState.rollY);
         state = State.values()[targetState.state];
     }
 
-    public void drawDebug(Graphics g, Camera cam) {
-        if(state == State.ATTACKING) {
-            System.out.println("Cam Pos: " + cam.getPos().getX() + ", " + cam.getPos().getY());
-            Vector worldPos = new Vector(x, y).add(new Vector(5, 0).setRotation(lookRotation).setLength(attackOffset));
-            System.out.println("World Pos: " + worldPos.getX() + ", " + worldPos.getY());
-            float viewableAttackRadius = attackRadius * cam.getScale();
-            g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
-        }
+//    public void drawDebug(Graphics g, Camera cam) {
+//        if(state == State.ATTACKING) {
+//            System.out.println("Cam Pos: " + cam.getPos().getX() + ", " + cam.getPos().getY());
+//            Vector worldPos = new Vector(x, y).add(new Vector(5, 0).setRotation(lookRotation).setLength(attackOffset));
+//            System.out.println("World Pos: " + worldPos.getX() + ", " + worldPos.getY());
+//            float viewableAttackRadius = attackRadius * cam.getScale();
+//            g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
+//        }
+//    }
+
+    public boolean canCollect(Collectible c) {
+        if(c.getType() == Collectible.Type.SWORD) return swordLevel < 1;
+        if(c.getType() == Collectible.Type.ARMOR) return armorPlates < 3;
+        return false;
     }
 
     public void collect(Collectible c) {
-        System.out.println("Collected " + c.getType().name() + "!");
+        if(c.getType() == Collectible.Type.SWORD) {
+            if(swordLevel < 1) ++swordLevel;
+        } else if (c.getType() == Collectible.Type.ARMOR) {
+            if(armorPlates < 3) ++armorPlates;
+        }
     }
 
     public float getLookRotation() {
         return this.lookRotation;
+    }
+
+    public int getDamage() {
+        return swordLevel == 1 ? 25 : 10;
     }
 }

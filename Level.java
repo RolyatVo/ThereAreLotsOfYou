@@ -1,5 +1,6 @@
 package lotsofyou;
 
+import jig.Vector;
 import org.newdawn.slick.SlickException;
 
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ public class Level {
 
                 tilemap = new Tilemap(tiles);
                 //tilemap.loadFromFile("LotsOfYou/src/lotsofyou/levels/test.txt");
+                Collectible.setCollectibleRenderCam(cam);
                 tilemap.loadFromFile(targetLevel);
             } catch (SlickException e) {
                 e.printStackTrace();
@@ -108,4 +110,5 @@ public class Level {
     public static void render() {
         tilemap.draw();
     }
+
 }

@@ -21,7 +21,6 @@ public class StartState extends BasicGameState {
     SpriteStack playerSprite;
 
    // SpriteStackAnimation playerAnimated;
-    Player player;
 
     PlayerInput playerInput;
 
@@ -42,6 +41,7 @@ public class StartState extends BasicGameState {
 
         playerSprite = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
 
+
         animations = new Animations(cam);
 
         ui = new UI_interface( 960, 540);
@@ -50,8 +50,6 @@ public class StartState extends BasicGameState {
         serverConnect();
 
         Level.InitLevel("LotsOfYou/src/lotsofyou/levels/test.txt", cam);
-
-        Collectible.setCollectibleRenderCam(cam);
     }
 
 
@@ -73,7 +71,6 @@ public class StartState extends BasicGameState {
             }
         }
 
-        ui.render(g);
 
         synchronized (Collectible.getCollectibles()) {
             for(Collectible c : Collectible.getCollectibles()) {
@@ -84,6 +81,7 @@ public class StartState extends BasicGameState {
         Level.render();
 
         SpriteStack.doDrawAll();
+        ui.render(g);
     }
 
     @Override
@@ -179,11 +177,10 @@ public class StartState extends BasicGameState {
                             }
                         }
                     }
-                    Thread.sleep(5);
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }
 
-            } catch (IOException | InterruptedException ex) {
+            } catch (IOException ex) {
                 //TODO : set up enemies here on client side
                 ex.printStackTrace();
             }
