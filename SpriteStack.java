@@ -24,7 +24,7 @@ public class SpriteStack extends SpriteSheet {
         int i = 0;
         while(!toRender.isEmpty()) {
             ToDrawSpriteStack t = toRender.poll();
-            t.draw();
+            if(t.minY > 0) t.draw();
         }
     }
 

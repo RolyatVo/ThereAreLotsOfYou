@@ -90,4 +90,8 @@ public class Collectible {
     public void update(int delta) {
         collectibles.forEach(c -> c.animatedSprite.update(delta));
     }
+
+    public static void clearCollectibles() {
+        collectibles.clear();
+    }
 }

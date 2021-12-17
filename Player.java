@@ -1,5 +1,6 @@
 package lotsofyou;
 
+import jig.ResourceManager;
 import jig.Vector;
 import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.lwjgl.input.Keyboard;
@@ -13,6 +14,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Player {
+
+    int prevArmor = 0;
+    int prevSword = 0;
+    int prevHealth = 100;
+    int prevFrame = 0;
 
     //the player needs to propogate the keypresses, and their look rotation to the server
 
@@ -56,11 +62,11 @@ public class Player {
     private float actionTime;
     private static final float rollTimeMax = 0.5f;
     private static final float attackTimeMax = 0.5f;
-    private final float clapOffset = 5.0f;
-    private final float clapRadius = 10.0f;
+    private final float clapOffset = 3.0f;
+    private final float clapRadius = 6.0f;
 
-    private final float swordOffset = 20.0f;
-    private final float swordRadius = 50.0f;
+    private final float swordOffset = 7.5f;
+    private final float swordRadius = 15;
 
     private Vector rollDir;
 
@@ -116,6 +122,9 @@ public class Player {
 
     void update(float delta, Tilemap map) {
 
+        if(isDead())
+            return;
+
         float deltaSeconds = delta / 1000;
 
         switch (state) {
@@ -132,8 +141,6 @@ public class Player {
                 for(Rectangle r_ : t.getColliders()) {
                     Rectangle r = new Rectangle(r_.getX() + t.getX(), r_.getY() + t.getY(), r_.getWidth(), r_.getHeight());
                     if(r.intersects(newCollider)) {
-                        System.out.println("Us " + newCollider.getX() + ", " + newCollider.getY());
-                        System.out.println("Intersecting with " + r.getX() + ", " + r.getY());
                         //the amount into the thing we've gone (subtract to undo)
                         float xOverlap = 0, yOverlap = 0;
 
@@ -181,17 +188,14 @@ public class Player {
                         //just x
                         else if (xOverlap != 0) {
                             newCollider.setX(Math.round(newCollider.getX() - xOverlap));
-                            System.out.println("xOverlap: " + xOverlap);
                             xVel = 0;
                         }
                         //just y
                         else if (yOverlap != 0) {
                             newCollider.setY(Math.round(newCollider.getY() - yOverlap));
-                            System.out.println("yOverlap: " + yOverlap);
                             yVel = 0;
                         }
 
-                        System.out.println("New Us " + newCollider.getX() + ", " + newCollider.getY());
                     }
                 }
             }
@@ -279,7 +283,7 @@ public class Player {
         float attackRadius = clapRadius;
         float attackOffset = clapOffset;
 
-        if(swordLevel > 0) {
+        if(other.swordLevel > 0) {
             attackRadius = swordRadius;
             attackOffset = swordOffset;
         }
@@ -287,9 +291,9 @@ public class Player {
         if(other.state == State.ATTACKING && state != State.ROLLING) {
             Vector ourPos = new Vector(x, y);
             Vector otherPos = new Vector(other.x, other.y);
-            return otherPos.add(
-                    new Vector(0, 0).setRotation(other.attackRotation).setLength(attackOffset)
-            ).distance(ourPos) < attackRadius;
+            Vector centerPos = otherPos.add(new Vector(1, 0).setLength(attackOffset).setRotation(other.attackRotation));
+            System.out.println("Attack: " + centerPos + ", r: " + attackRadius);
+            return centerPos.distance(ourPos) < attackRadius;
         }
         return false;
     }
@@ -325,44 +329,71 @@ public class Player {
 
 
     public void render() {
-        if(state != prevRenderState) {
+        if(isDead()) {
+            currentAnimation = animations.deathAnimation;
+        } else {
+            if(state != prevRenderState) {
+                if(state == State.FREE) {
+                    if(xVel != 0 || yVel != 0) {
+                        if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
+                        if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
+                    } else {
+                        currentAnimation = animations.idleAnimation;
+                    }
+                }
+                else if(state == State.ROLLING) {
+                    if(swordLevel == 0) currentAnimation = animations.rollingAnimation;
+                    if(swordLevel == 1) currentAnimation = animations.rollingSwordAnimation;
+                } else if (state == State.ATTACKING) {
+                    if(swordLevel == 0) currentAnimation = animations.clapAttackAnimation;
+                    if(swordLevel == 1) currentAnimation = animations.attackAnimation;
+
+                    ResourceManager.getSound(LotsOfYouGame.SWING_SND).play();
+                }
+                currentAnimation.setFrame(0);
+            }
+
             if(state == State.FREE) {
-                if(xVel != 0 || yVel != 0) {
+                if (xVel != 0 || yVel != 0) {
                     if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
                     if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
+
+                    if(prevFrame != currentAnimation.getFrame() && currentAnimation.getFrame() % 3 == 0) {
+                        ResourceManager.getSound(LotsOfYouGame.STEP_SND).play();
+                    }
                 } else {
                     currentAnimation = animations.idleAnimation;
                 }
-            }
-            else if(state == State.ROLLING) {
-                if(swordLevel == 0) currentAnimation = animations.rollingAnimation;
-                if(swordLevel == 1) currentAnimation = animations.rollingSwordAnimation;
-            } else if (state == State.ATTACKING) {
-                if(swordLevel == 0) currentAnimation = animations.clapAttackAnimation;
-                if(swordLevel == 1) currentAnimation = animations.attackAnimation;
-            }
-            currentAnimation.setFrame(0);
-        }
 
-        if(state == State.FREE) {
-            if (xVel != 0 || yVel != 0) {
-                if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
-                if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
-            } else {
-                currentAnimation = animations.idleAnimation;
+                currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
             }
-
-            currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
-        }
-        else if(state == State.ATTACKING) {
-            currentAnimation.setRotation(attackRotation);
-        }
-        else if (state == State.ROLLING) {
-            currentAnimation.setRotation(((360 - lookRotation) + (float)rollDir.getRotation()) % 360.0f);
+            else if(state == State.ATTACKING) {
+                currentAnimation.setRotation(attackRotation);
+            }
+            else if (state == State.ROLLING) {
+                currentAnimation.setRotation(((360 - lookRotation) + (float)rollDir.getRotation()) % 360.0f);
+            }
         }
 
         currentAnimation.draw(x - currentAnimation.getFrameWidth() / 2 ,y - currentAnimation.getFrameHeight() / 2);
         prevRenderState = state;
+
+        if(healthNUM < prevHealth) {
+            ResourceManager.getSound(LotsOfYouGame.HURT_SND).play();
+        }
+
+        if(armorPlates > prevArmor) {
+            ResourceManager.getSound(LotsOfYouGame.ARMOR_POWERUP_SND).play();
+        }
+
+        if(swordLevel > prevSword) {
+            ResourceManager.getSound(LotsOfYouGame.POWERUP_SND).play();
+        }
+
+        prevHealth = healthNUM;
+        prevArmor = armorPlates;
+        prevSword = swordLevel;
+        prevFrame = currentAnimation.getFrame();
     }
 
     public PlayerState getPlayerState() {
@@ -388,15 +419,21 @@ public class Player {
         state = State.values()[targetState.state];
     }
 
-//    public void drawDebug(Graphics g, Camera cam) {
-//        if(state == State.ATTACKING) {
-//            System.out.println("Cam Pos: " + cam.getPos().getX() + ", " + cam.getPos().getY());
-//            Vector worldPos = new Vector(x, y).add(new Vector(5, 0).setRotation(lookRotation).setLength(attackOffset));
-//            System.out.println("World Pos: " + worldPos.getX() + ", " + worldPos.getY());
-//            float viewableAttackRadius = attackRadius * cam.getScale();
-//            g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
-//        }
-//    }
+    public void drawDebug(Graphics g, Camera cam) {
+        float attackRadius = clapRadius;
+        float attackOffset = clapOffset;
+
+        if(swordLevel > 0) {
+            attackRadius = swordRadius;
+            attackOffset = swordOffset;
+        }
+
+        if(state == State.ATTACKING) {
+            Vector worldPos = new Vector(x, y).add(new Vector(5, 0).setLength(attackOffset).setRotation(attackRotation + cam.getRotation()));
+            float viewableAttackRadius = attackRadius * cam.getScale();
+            g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
+        }
+    }
 
     public boolean canCollect(Collectible c) {
         if(c.getType() == Collectible.Type.SWORD) return swordLevel < 1;
@@ -418,5 +455,23 @@ public class Player {
 
     public int getDamage() {
         return swordLevel == 1 ? 25 : 10;
+    }
+
+    //called by the server while waiting for other players to connect
+    public void waitForOthers() {
+        targetLookRotation = input.lookRotation;
+
+        lookRotation += moveRatio * (((targetLookRotation + (180.0f - lookRotation)) % 360.0f) - 180.0f);
+    }
+
+    public boolean isDead() {
+        return healthNUM <= 0;
+    }
+
+    public void resurrect() {
+        healthNUM = 100;
+        armorPlates = 0;
+        swordLevel = 0;
+        state = State.FREE;
     }
 }

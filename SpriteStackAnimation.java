@@ -93,4 +93,8 @@ public class SpriteStackAnimation {
             this.duration = duration;
         }
     }
+
+    int getFrame() {
+        return currentFrame;
+    }
 }
