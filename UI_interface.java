@@ -13,6 +13,7 @@ public class UI_interface {
     private armorSection armorSection;
     private weaponSection weaponSection;
     private announcement announce;
+    private minimap map;
 
     public UI_interface(int screenWidth, int screenHeight) {
         this.bottomRow = screenHeight * 0.9f - 15;
@@ -23,6 +24,7 @@ public class UI_interface {
         armorSection = new armorSection(200, 30);
         weaponSection = new weaponSection();
         announce = new announcement(screenWidth, screenHeight);
+        map = new minimap(800, 20);
     }
 
     public void render(Graphics g) {
@@ -31,12 +33,14 @@ public class UI_interface {
         this.weaponSection.render(960 * 0.68f, bottomRow, g);
         this.armorSection.render(960 * 0.75f, bottomRow, g);
         announce.render(g);
+        map.render(g);
     }
 
     public void update(Player player) {
         healthBar.update(player.getHealthNUM());
         armorSection.update(player.getArmorPlates());
         weaponSection.update(true);
+        map.update(player);
     }
 
     public void setAnnouncement(String text) {

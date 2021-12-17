@@ -9,8 +9,13 @@ import java.util.HashMap;
 
 public class Level {
     private static Tilemap tilemap;
-    private static final Vector spawnCenter = new Vector(0, 0);
+    private static final Vector spawnCenter = new Vector(64 * 16, 64 * 16);
     private static final float spawnRadius = 100;
+
+//    private static final Vector spawnCenter = new Vector(0, 0);
+//    private static final float spawnRadius = 0;
+
+    private static boolean reloadQueued;
 
     public static void InitLevel(String targetLevel, Camera cam) {
         try {
@@ -103,7 +108,7 @@ public class Level {
     }
 
     public static void render() {
-        tilemap.draw();
+            tilemap.draw();
     }
 
     public static void prepareForSpawn(Collection<Player> players) {
@@ -117,4 +122,15 @@ public class Level {
         }
     }
 
+    synchronized public static void queueReload() {
+        reloadQueued = true;
+    }
+
+    synchronized public static void checkQueuedReload(String targetLevel, Camera cam) {
+        if(reloadQueued) {
+            Collectible.clearCollectibles();
+            tilemap.clear();
+            InitLevel(targetLevel, cam);
+        };
+    }
 }

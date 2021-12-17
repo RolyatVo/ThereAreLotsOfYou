@@ -67,7 +67,7 @@ public class StartState extends BasicGameState {
         synchronized (playerManager) {
             for (Player p : playerManager.getPlayers()) {
                 p.render();
-                p.drawDebug(g, cam);
+//                p.drawDebug(g, cam);
             }
         }
 
@@ -114,6 +114,8 @@ public class StartState extends BasicGameState {
                 playerInput.update(container.getInput(), cam, new Vector(0, 0));
             }
         }
+
+        Level.checkQueuedReload("LotsOfYou/src/lotsofyou/levels/test.txt", cam);
     }
 
     private Socket socket;
@@ -186,7 +188,7 @@ public class StartState extends BasicGameState {
                             ui.setAnnouncement("" + (num != 0 ? num : ""));
                         }
                     } else if (packetType == LotsOfYouGame.RESTART_PACKET) {
-                        Level.InitLevel("LotsOfYou/src/lotsofyou/levels/test.txt", cam);
+                        Level.queueReload();
                     }
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }

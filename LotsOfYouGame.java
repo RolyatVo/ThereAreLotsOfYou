@@ -58,6 +58,8 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String ARMOR_RSC = "lotsofyou/resource/shield.png";
 	public static final String SWORD_RSC = "lotsofyou/resource/sword.png";
 	public static final String PLAYER_SHADOW_RSC = "lotsofyou/resource/player_shadow.png";
+	public static final String MINIMAP = "lotsofyou/resource/minimap.png";
+	public static final String PLAYER_MARKER = "lotsofyou/resource/player_marker.png";
 
 
 	//Walking PNGs
@@ -178,6 +180,10 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(PLAYER_TEST);
 		ResourceManager.loadImage(ARMOR_RSC);
 		ResourceManager.loadImage(SWORD_RSC);
+		ResourceManager.loadImage(MINIMAP);
+		ResourceManager.loadImage(PLAYER_MARKER);
+
+
 
 		ResourceManager.loadImage(WALL_CORNER);
 		ResourceManager.loadImage(WALL_CROSS);

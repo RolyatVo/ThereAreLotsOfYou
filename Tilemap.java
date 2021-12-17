@@ -59,4 +59,9 @@ public class Tilemap {
     public ArrayList<Tile> getMap() {
         return this.map;
     }
+
+    public void clear() {
+        tiles.clear();
+        map.clear();
+    }
 }
