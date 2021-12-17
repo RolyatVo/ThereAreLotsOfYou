@@ -125,7 +125,7 @@ public class StartState extends BasicGameState {
 
     private void serverConnect() {
         try {
-            socket = new Socket("localhost", 55555);
+            socket = new Socket("localhost", 10000);
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 

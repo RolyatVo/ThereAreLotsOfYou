@@ -18,6 +18,7 @@ public class Player {
     int prevArmor = 0;
     int prevSword = 0;
     int prevHealth = 100;
+    int prevFrame = 0;
 
     //the player needs to propogate the keypresses, and their look rotation to the server
 
@@ -353,9 +354,9 @@ public class Player {
                 if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
                 if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
 
-//                if(currentAnimation.getFrame() % 3 == 0) {
-//                    ResourceManager.getSound(LotsOfYouGame.STEP_SND).play();
-//                }
+                if(prevFrame != currentAnimation.getFrame() && currentAnimation.getFrame() % 3 == 0) {
+                    ResourceManager.getSound(LotsOfYouGame.STEP_SND).play();
+                }
             } else {
                 currentAnimation = animations.idleAnimation;
             }
@@ -387,6 +388,7 @@ public class Player {
         prevHealth = healthNUM;
         prevArmor = armorPlates;
         prevSword = swordLevel;
+        prevFrame = currentAnimation.getFrame();
     }
 
     public PlayerState getPlayerState() {

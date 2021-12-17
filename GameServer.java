@@ -47,7 +47,7 @@ public class GameServer {
         state = GameServerState.WAITING;
 
         try {
-            serverSocket = new ServerSocket(55555);
+            serverSocket = new ServerSocket(10000);
 
         } catch (IOException exception) {
             System.out.println("IO Exception from server");

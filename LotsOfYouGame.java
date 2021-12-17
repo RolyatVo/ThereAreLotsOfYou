@@ -62,7 +62,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String PLAYER_MARKER = "lotsofyou/resource/player_marker.png";
 
 	public static final String SWING_SND = "lotsofyou/resource/swing.wav";
-	//public static final String STEP_SND = "lotsofyou/resource/step.wav";
+	public static final String STEP_SND = "lotsofyou/resource/step.wav";
 	public static final String POWERUP_SND = "lotsofyou/resource/powerup.wav";
 	public static final String ARMOR_POWERUP_SND = "lotsofyou/resource/powerup_armor.wav";
 	public static final String HURT_SND = "lotsofyou/resource/hurt.wav";
@@ -208,7 +208,7 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadSound(HURT_SND);
 		ResourceManager.loadSound(POWERUP_SND);
 		ResourceManager.loadSound(ARMOR_POWERUP_SND);
-		//ResourceManager.loadSound(STEP_SND);
+		ResourceManager.loadSound(STEP_SND);
 		ResourceManager.loadSound(SWING_SND);
 
 		//Armour
