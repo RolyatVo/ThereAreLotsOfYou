@@ -260,6 +260,8 @@ public class Player {
     }
 
     private void attacking(float deltaSeconds) {
+        xVel = 0;
+        yVel = 0;
         if(actionTime > attackTimeMax) {
             hitPlayers.clear();
             state = State.FREE;
@@ -337,6 +339,8 @@ public class Player {
             }
             else if(state == State.ROLLING) {
                 currentAnimation = animations.rollingAnimation;
+            } else if (state == State.ATTACKING) {
+                currentAnimation = animations.clapAttackAnimation;
             }
             currentAnimation.setFrame(0);
         }
@@ -351,7 +355,7 @@ public class Player {
             currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
         }
         else if(state == State.ATTACKING) {
-            currentAnimation.setRotation(attackRotation);
+            currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
         }
         else if (state == State.ROLLING) {
             currentAnimation.setRotation(((360 - lookRotation) + (float)rollDir.getRotation()) % 360.0f);
