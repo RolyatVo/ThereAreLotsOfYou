@@ -10,6 +10,7 @@ public class UprightSprite extends Image {
     public UprightSprite(String ref, Camera cam) throws SlickException {
         super(ref);
         this.renderCam = cam;
+        setFilter(FILTER_NEAREST);
     }
 
     @Override
