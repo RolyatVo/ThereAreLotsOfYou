@@ -42,13 +42,6 @@ public class StartState extends BasicGameState {
 
         animations = new Animations(cam);
 
-
-
-
-        //playerAnimated = animations.walkingAnimation;
-
-
-
         ui = new UI_interface( 960, 540);
         playerInput = new PlayerInput();
         cam.setScale(3);
@@ -59,7 +52,7 @@ public class StartState extends BasicGameState {
 
     @Override
     public void enter(GameContainer container, StateBasedGame game) {
-        Collectible.addCollectible(Collectible.Type.ARMOR, new Vector(-64, -64));
+        //Collectible.addCollectible(Collectible.Type.ARMOR, new Vector(-64, -64));
     }
 
     @Override
@@ -72,7 +65,7 @@ public class StartState extends BasicGameState {
         tree.draw(32, 32);
         synchronized (playerManager) {
             for (Player p : playerManager.getPlayers()) {
-                p.render(playerInput);
+                p.render();
 //                p.drawDebug(g, cam);
             }
         }
@@ -100,22 +93,13 @@ public class StartState extends BasicGameState {
         // System.out.println("Updating...");
         synchronized (playerManager) {
             Player player = playerManager.getPlayer(playerID);
-
             if (player != null) {
+                player.updateAnimation(delta);
+
                 playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
                 ui.update(player);
-                if( (playerInput.down || playerInput.up || playerInput.left || playerInput.right))  {
-                    player.currentAnimation.play();
-                    player.currentAnimation.update(delta);
-                }
-                else {
-                    player.currentAnimation.stop();
-                    player.currentAnimation.setFrame(0);
-                    player.animations.rollingAnimation.setFrame(0);
-                }
+
                 Collectible.getCollectibles().forEach(c -> c.update(delta));
-
-
                 cam.setTargetPos(player.getX(), player.getY());
                 cam.update(container.getInput(), player);
             } else {

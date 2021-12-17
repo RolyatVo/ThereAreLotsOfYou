@@ -114,13 +114,6 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String WALKING_SWORD_RSC_4 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME4.png";
 	public static final String WALKING_SWORD_RSC_5 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME5.png";
 
-
-
-
-
-
-
-
 	public final int ScreenWidth;
 	public final int ScreenHeight;
 	public static final int INPUT_PACKET = 0;

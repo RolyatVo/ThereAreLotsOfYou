@@ -40,7 +40,7 @@ public class GameServer {
             System.out.println("IO Exception from server");
         }
 
-        Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
+        // Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
     }
 
     public void listenForConnections() {

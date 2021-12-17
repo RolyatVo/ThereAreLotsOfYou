@@ -7,8 +7,8 @@ import org.newdawn.slick.Image;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class SpriteStackAnimation extends Animation {
-    private ArrayList<SSFrame> frames = new ArrayList<>();
+public class SpriteStackAnimation {
+    private final ArrayList<SSFrame> frames = new ArrayList<>();
     boolean isPlaying;
     float rotation;
 
@@ -19,7 +19,7 @@ public class SpriteStackAnimation extends Animation {
 
     public SpriteStackAnimation(SpriteStack[] frames, int duration) {
         currentDuration = duration;
-        currentFrame =0;
+        currentFrame = 0;
         isPlaying = true;
         rotation = 0;
 //        this.cam = cam;
@@ -51,21 +51,13 @@ public class SpriteStackAnimation extends Animation {
 
         if(isPlaying) {
             if (this.currentDuration < 0) {
-                if (currentFrame < frames.size()) {
-                    this.currentFrame++;
-                }
-                if (currentFrame == frames.size()-1) {
-                    this.currentFrame = 0;
-                }
-                this.currentDuration = getCurrentSSFrame().duration;
+                ++currentFrame;
+                currentFrame %= frames.size();
 
+                this.currentDuration = getCurrentSSFrame().duration;
             }
             this.currentDuration -= delta;
         }
-//        System.out.println("Delta: " + delta);
-//        System.out.println("Current Duration: " + currentDuration);
-//        System.out.println("Cyrrent Frame: " + currentFrame);
-
     }
 
 
@@ -95,15 +87,10 @@ public class SpriteStackAnimation extends Animation {
     private class SSFrame {
         public SpriteStack spritestack;
         public int duration;
-        public int x = -1;
-        public int y = -1;
-
 
         public SSFrame(SpriteStack frame, int duration) {
             this.spritestack = frame;
             this.duration = duration;
         }
-
-
     }
 }

@@ -60,6 +60,7 @@ public class Player {
         ROLLING
     }
 
+    private State prevRenderState;
     private State state;
 
     ArrayList<Integer> hitPlayers;
@@ -77,6 +78,7 @@ public class Player {
         this.rollDir = new Vector(0, 0);
         this.input = new PlayerInput();
         this.state = State.FREE;
+        this.prevRenderState = this.state;
         this.hitPlayers = new ArrayList<>();
         keyPress = -1;
         ID = -99;
@@ -121,6 +123,7 @@ public class Player {
     }
 
     void update(float delta) {
+
         float deltaSeconds = delta / 1000;
 
         switch (state) {
@@ -128,6 +131,10 @@ public class Player {
             case ROLLING -> rolling(deltaSeconds);
             case ATTACKING -> attacking(deltaSeconds);
         }
+    }
+
+    void updateAnimation(int delta) {
+        currentAnimation.update((int)delta);
     }
 
     void setPlayerInput(PlayerInput input) {
@@ -250,10 +257,30 @@ public class Player {
     public int getArmorPlates() { return this.armorPlates; }
 
 
-    public void render(PlayerInput in) {
-        currentAnimation.setRotation(lookRotation);
-        currentAnimation.draw(x - width / 2 ,y - height / 2);
+    public void render() {
+        if(state != prevRenderState) {
+            if(state == State.FREE) {
+                if(input.up || input.down || input.left || input.right) {
+                    currentAnimation = animations.walkingAnimation;
+                } else {
+                    currentAnimation = animations.idleAnimation;
+                }
+            }
+            else if(state == State.ROLLING) {
+                currentAnimation = animations.rollingAnimation;
+            }
+            currentAnimation.setFrame(0);
+        }
 
+        if(state == State.FREE || state == State.ATTACKING) {
+            currentAnimation.setRotation(lookRotation);
+        }
+        else if (state == State.ROLLING) {
+            currentAnimation.setRotation((float)rollDir.getRotation());
+        }
+
+        currentAnimation.draw(x - width / 2 ,y - height / 2);
+        prevRenderState = state;
     }
 
     public float getMoveRotation() {
@@ -275,15 +302,6 @@ public class Player {
         actionTime = targetState.actionTime;
         rollDir = new Vector(targetState.rollX, targetState.rollY);
         state = State.values()[targetState.state];
-        if(state == State.FREE) {
-            currentAnimation = animations.walkingAnimation;
-            currentAnimation.setRotation(lookRotation);
-        }
-        else if(state == State.ROLLING) {
-            currentAnimation = animations.rollingAnimation;
-            animations.rollingAnimation.setRotation((float) rollDir.getRotation());
-            this.lookRotation = (float) rollDir.getRotation();
-        }
     }
 
     public void drawDebug(Graphics g, Camera cam) {

@@ -1,9 +1,12 @@
 package lotsofyou;
 
+import org.lwjgl.examples.spaceinvaders.Sprite;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.SlickException;
 
 public class Animations {
+    SpriteStackAnimation idleAnimation;
+
     SpriteStackAnimation walkingAnimation;
 
     SpriteStackAnimation armorAnimation;
@@ -19,7 +22,9 @@ public class Animations {
 
     public Animations(Camera cam) throws SlickException {
 
-        SpriteStack[] walking = new SpriteStack[7];
+
+
+        SpriteStack[] walking = new SpriteStack[6];
         walking[0] = new SpriteStack(LotsOfYouGame.WALKING_RSC_1, 6, 7, cam);
         walking[1] = new SpriteStack(LotsOfYouGame.WALKING_RSC_2, 6, 7, cam);
         walking[2] = new SpriteStack(LotsOfYouGame.WALKING_RSC_3, 6, 7, cam);
@@ -27,6 +32,10 @@ public class Animations {
         walking[4] = new SpriteStack(LotsOfYouGame.WALKING_RSC_5, 6, 7, cam);
         walking[5] = new SpriteStack(LotsOfYouGame.WALKING_RSC_6, 6, 7, cam);
         walkingAnimation = new SpriteStackAnimation(walking, 150);
+
+        SpriteStack[] idle = new SpriteStack[1];
+        idle[0] = new SpriteStack(LotsOfYouGame.PLAYER_TEST, 6, 3, cam);
+        idleAnimation = new SpriteStackAnimation(idle, 150);
 
         SpriteStack[] armorFrames = new SpriteStack[8];
         armorFrames[0] = new SpriteStack(LotsOfYouGame.ARMOR_RSC_0, 10, 7, cam);
