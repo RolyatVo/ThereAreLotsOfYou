@@ -18,11 +18,16 @@ public class Player {
 
     private float x;
     private float y;
-    private float width;
-    private float height;
+    private float prevXVel;
+    private float prevYVel;
+    private float xVel;
+    private float yVel;
 
-    private final float moveSpeed = 50.0f;
-    private final float rollSpeed = 240.0f;
+    private static final float moveSpeed = 50.0f;
+    private static final float rollSpeed = 240.0f;
+
+    private static final int width = 3;
+    private static final int height = 3;
 
     //the direction the player is looking
     private float lookRotation;
@@ -43,12 +48,12 @@ public class Player {
     private int healthNUM = 50;
     private int armorPlates = 0;
 
-    private final float rotationAmount = 30.0f;
-    private final float moveRatio = 0.08f;
+    private static final float rotationAmount = 30.0f;
+    private static final float moveRatio = 0.08f;
 
     private float actionTime;
-    private final float rollTimeMax = 0.5f;
-    private final float attackTimeMax = 0.5f;
+    private static final float rollTimeMax = 0.5f;
+    private static final float attackTimeMax = 0.5f;
     private final float attackOffset = 5.0f;
     private final float attackRadius = 10.0f;
 
@@ -65,12 +70,10 @@ public class Player {
 
     ArrayList<Integer> hitPlayers;
 
-    public Player(SpriteStack sprite, float x, float y, float width, float height) {
+    public Player(SpriteStack sprite, float x, float y) {
         playerSprite = sprite;
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
         this.lookRotation = 0;
         this.moveRotation = 0;
         this.targetMoveRotation = 0;
@@ -80,15 +83,14 @@ public class Player {
         this.state = State.FREE;
         this.prevRenderState = this.state;
         this.hitPlayers = new ArrayList<>();
+        this.xVel = 0;
+        this.yVel = 0;
         keyPress = -1;
         ID = -99;
     }
-    public Player(Animations animations, float x, float y, float width, float height) {
-
+    public Player(Animations animations, float x, float y) {
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
         this.lookRotation = 0;
         this.moveRotation = 0;
         this.targetMoveRotation = 0;
@@ -97,6 +99,8 @@ public class Player {
         this.input = new PlayerInput();
         this.state = State.FREE;
         this.animations = animations;
+        this.xVel = 0;
+        this.yVel = 0;
         currentAnimation = animations.walkingAnimation;
         keyPress = -1;
         ID = -99;
@@ -109,8 +113,6 @@ public class Player {
         this.y = y;
         ID = id;
 
-        this.width = 6;
-        this.height = 3;
         this.lookRotation = 0;
         this.moveRotation = 0;
         this.targetMoveRotation = 0;
@@ -119,10 +121,13 @@ public class Player {
         this.input = new PlayerInput();
         this.hitPlayers = new ArrayList<>();
 
+        this.xVel = 0;
+        this.yVel = 0;
+
         this.state = State.FREE;
     }
 
-    void update(float delta) {
+    void update(float delta, Tilemap map) {
 
         float deltaSeconds = delta / 1000;
 
@@ -131,6 +136,87 @@ public class Player {
             case ROLLING -> rolling(deltaSeconds);
             case ATTACKING -> attacking(deltaSeconds);
         }
+
+        Rectangle prevCollider = new Rectangle(x - 3, y - 3, 6, 6);
+        Rectangle newCollider = new Rectangle(x - 3 + xVel, y - 3 + yVel, 6, 6);
+//        System.out.println("Prev new position: " + newCollider.getX() + ", " + newCollider.getY());
+        for(Tile t : map.getMap()) {
+            if(t.intersects(newCollider)) {
+                for(Rectangle r_ : t.getColliders()) {
+                    Rectangle r = new Rectangle(r_.getX() + t.getX(), r_.getY() + t.getY(), r_.getWidth(), r_.getHeight());
+                    if(r.intersects(newCollider)) {
+                        System.out.println("Us " + newCollider.getX() + ", " + newCollider.getY());
+                        System.out.println("Intersecting with " + r.getX() + ", " + r.getY());
+                        //the amount into the thing we've gone (subtract to undo)
+                        float xOverlap = 0, yOverlap = 0;
+
+                        float prevRight = prevCollider.getX() + prevCollider.getWidth();
+                        float prevBottom = prevCollider.getY() + prevCollider.getHeight();
+
+                        float newRight = newCollider.getX() + newCollider.getWidth();
+                        float newBottom = newCollider.getY() + newCollider.getHeight();
+
+                        float tileRight = r.getX() + r.getWidth();
+                        float tileBottom = r.getY() + r.getHeight();
+
+
+                        //collided while moving right
+                        if (prevRight <= r.getX() && newRight > r.getX()) {
+                            xOverlap = newRight - r.getX();
+                        }
+
+                        //collided while moving left
+                        if (prevCollider.getX() >= tileRight && newCollider.getX() < tileRight) {
+                            xOverlap = newCollider.getX() - tileRight;
+                        }
+
+                        //collided while moving down
+                        if (prevBottom <= r.getY() && newBottom > r.getY()) {
+                            yOverlap = newBottom - r.getY();
+                        }
+
+                        //collided while moving up
+                        if (prevCollider.getY() >= tileBottom && newCollider.getY() < tileBottom) {
+                            yOverlap = newCollider.getY() - tileBottom;
+                        }
+
+                        //corner
+                        if (xOverlap != 0 && yOverlap != 0) {
+                            //if we just started moving in the x axis, or we're moving slower
+                            if (xVel < yVel || prevXVel == 0) {
+                                newCollider.setX(Math.round(newCollider.getX() - xOverlap));
+                                xVel = 0;
+                            } else {
+                                newCollider.setY(Math.round(newCollider.getY() - yOverlap));
+                                yVel = 0;
+                            }
+                        }
+                        //just x
+                        else if (xOverlap != 0) {
+                            newCollider.setX(Math.round(newCollider.getX() - xOverlap));
+                            System.out.println("xOverlap: " + xOverlap);
+                            xVel = 0;
+                        }
+                        //just y
+                        else if (yOverlap != 0) {
+                            newCollider.setY(Math.round(newCollider.getY() - yOverlap));
+                            System.out.println("yOverlap: " + yOverlap);
+                            yVel = 0;
+                        }
+
+                        System.out.println("New Us " + newCollider.getX() + ", " + newCollider.getY());
+                    }
+                }
+            }
+        }
+
+//        System.out.println("New new position: " + newCollider.getX() + ", " + newCollider.getY());
+
+        x = newCollider.getX() + 3;
+        y = newCollider.getY() + 3;
+
+        prevXVel = xVel;
+        prevYVel = yVel;
     }
 
     void updateAnimation(int delta) {
@@ -162,14 +248,11 @@ public class Player {
         if(input.up) { --yDir; keyPress = Keyboard.KEY_W; }
         if(input.down) { ++yDir; keyPress = Keyboard.KEY_S; }
 
-        float transX = (float)Math.sin(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
-        float transY = (float)Math.cos(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
+        xVel = (float)Math.sin(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
+        yVel = (float)Math.cos(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
 
-        transX += (float)Math.sin(Math.toRadians(moveRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
-        transY += (float)Math.cos(Math.toRadians(moveRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
-
-        x += transX;
-        y += transY;
+        xVel += (float)Math.sin(Math.toRadians(moveRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
+        yVel += (float)Math.cos(Math.toRadians(moveRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
 
       //  if(playerSprite != null) playerSprite.setRotation(input.lookRotation);
       //  if(playerAnimation != null) playerAnimation.setRotation(input.lookRotation);
@@ -196,14 +279,11 @@ public class Player {
     }
 
     private void rolling(float deltaSeconds) {
-        float transX = (float)Math.sin(Math.toRadians(moveRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
-        float transY = (float)Math.cos(Math.toRadians(moveRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
+        xVel = (float)Math.sin(Math.toRadians(moveRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
+        yVel = (float)Math.cos(Math.toRadians(moveRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
 
-        transX += (float)Math.sin(Math.toRadians(moveRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
-        transY += (float)Math.cos(Math.toRadians(moveRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
-
-        x += transX;
-        y += transY;
+        xVel += (float)Math.sin(Math.toRadians(moveRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
+        yVel += (float)Math.cos(Math.toRadians(moveRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
 
         if(actionTime > rollTimeMax) { state = State.FREE; }
         actionTime += deltaSeconds;
@@ -279,7 +359,7 @@ public class Player {
             currentAnimation.setRotation((float)rollDir.getRotation());
         }
 
-        currentAnimation.draw(x - width / 2 ,y - height / 2);
+        currentAnimation.draw(x - currentAnimation.getFrameWidth() / 2 ,y - currentAnimation.getFrameHeight() / 2);
         prevRenderState = state;
     }
 
@@ -288,12 +368,16 @@ public class Player {
     }
 
     public PlayerState getPlayerState() {
-        return new PlayerState(x, y, lookRotation, moveRotation, targetMoveRotation, healthNUM, armorPlates, actionTime, rollDir, state);
+        return new PlayerState(x, y, xVel, yVel, prevXVel, prevYVel, lookRotation, moveRotation, targetMoveRotation, healthNUM, armorPlates, actionTime, rollDir, state);
     }
 
     public void setPlayerState(PlayerState targetState) {
         x = targetState.x;
         y = targetState.y;
+        xVel = targetState.xVel;
+        yVel = targetState.yVel;
+        prevXVel = targetState.prevXVel;
+        prevYVel = targetState.prevYVel;
         lookRotation = targetState.lookRotation;
         moveRotation = targetState.moveRotation;
         targetMoveRotation = targetState.targetMoveRotation;

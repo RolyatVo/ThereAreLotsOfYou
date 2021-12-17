@@ -32,6 +32,17 @@ public class SpriteStack extends SpriteSheet {
         this.height = h;
     }
 
+    public SpriteStack(SpriteStack other) throws SlickException {
+        super(other.ref, other.width, other.height);
+        this.setRotation(other.getRotation());
+        this.renderCam = other.renderCam;
+        this.imgArr = other.imgArr;
+        this.scaledArr = other.scaledArr;
+        this.width = other.width;
+        this.height = other.height;
+        this.currScale = other.currScale;
+    }
+
     @Override
     public void draw() {
         draw(0, 0);
