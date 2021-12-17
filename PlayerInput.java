@@ -18,6 +18,7 @@ public class PlayerInput {
     boolean rotateLeft;
     boolean roll;
     boolean attack;
+    float attackRotation;
     float lookRotation;
 
     public PlayerInput() {
@@ -71,9 +72,15 @@ public class PlayerInput {
 
         roll = in.isKeyPressed(Input.KEY_LSHIFT);
         attack = in.isMousePressed(Input.MOUSE_LEFT_BUTTON);
-        if(attack || in.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
+        if(attack) {
             Vector mousePos = cam.screenToWorld(in.getMouseX(), in.getMouseY());
-            lookRotation = (float) mousePos.subtract(playerPos).getRotation();
+            attackRotation = (float) mousePos.subtract(playerPos).getRotation();
+        }
+
+        if(in.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
+            Vector mousePos = cam.screenToWorld(in.getMouseX(), in.getMouseY());
+            lookRotation = (360.0f - ((float) mousePos.subtract(playerPos).getRotation() + 90)) % 360.0f;
+            System.out.println(lookRotation);
         }
 
         if(!prev.equals(this)) updated = true;
@@ -94,6 +101,7 @@ public class PlayerInput {
         outputStream.writeBoolean(rotateRight);
         outputStream.writeBoolean(roll);
         outputStream.writeBoolean(attack);
+        outputStream.writeFloat(attackRotation);
         outputStream.writeFloat(lookRotation);
     }
 
@@ -106,6 +114,7 @@ public class PlayerInput {
         rotateRight = inputStream.readBoolean();
         roll = inputStream.readBoolean();
         attack = inputStream.readBoolean();
+        attackRotation = inputStream.readFloat();
         lookRotation = inputStream.readFloat();
     }
 }

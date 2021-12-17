@@ -179,7 +179,7 @@ public class StartState extends BasicGameState {
                             }
                         }
                     }
-                    Thread.sleep(10);
+                    Thread.sleep(5);
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }
 

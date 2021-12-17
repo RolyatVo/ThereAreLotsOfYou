@@ -192,7 +192,7 @@ public class GameServer {
                         }
                     }
                     try {
-                        Thread.sleep(20);
+                        Thread.sleep(7);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }

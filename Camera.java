@@ -120,7 +120,7 @@ public class Camera {
         x += moveRatio * (targetPos.getX() - getCenterX());
         y += moveRatio * (targetPos.getY() - getCenterY());
 
-        rotation = player.getMoveRotation();
+        rotation = player.getLookRotation();
 
 //        int zoom = 0;
 //        if(in.isKeyDown(Keyboard.KEY_N)) --zoom;
