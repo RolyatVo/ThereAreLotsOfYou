@@ -132,8 +132,6 @@ public class Player {
                 for(Rectangle r_ : t.getColliders()) {
                     Rectangle r = new Rectangle(r_.getX() + t.getX(), r_.getY() + t.getY(), r_.getWidth(), r_.getHeight());
                     if(r.intersects(newCollider)) {
-                        System.out.println("Us " + newCollider.getX() + ", " + newCollider.getY());
-                        System.out.println("Intersecting with " + r.getX() + ", " + r.getY());
                         //the amount into the thing we've gone (subtract to undo)
                         float xOverlap = 0, yOverlap = 0;
 
@@ -191,7 +189,6 @@ public class Player {
                             yVel = 0;
                         }
 
-                        System.out.println("New Us " + newCollider.getX() + ", " + newCollider.getY());
                     }
                 }
             }
@@ -288,7 +285,7 @@ public class Player {
             Vector ourPos = new Vector(x, y);
             Vector otherPos = new Vector(other.x, other.y);
             return otherPos.add(
-                    new Vector(0, 0).setRotation(other.attackRotation).setLength(attackOffset)
+                    new Vector(1, 0).setRotation(other.attackRotation).setLength(attackOffset)
             ).distance(ourPos) < attackRadius;
         }
         return false;
@@ -418,5 +415,23 @@ public class Player {
 
     public int getDamage() {
         return swordLevel == 1 ? 25 : 10;
+    }
+
+    //called by the server while waiting for other players to connect
+    public void waitForOthers() {
+        targetLookRotation = input.lookRotation;
+
+        lookRotation += moveRatio * (((targetLookRotation + (180.0f - lookRotation)) % 360.0f) - 180.0f);
+    }
+
+    public boolean isDead() {
+        return healthNUM <= 0;
+    }
+
+    public void resurrect() {
+        healthNUM = 100;
+        armorPlates = 0;
+        swordLevel = 0;
+        state = State.FREE;
     }
 }

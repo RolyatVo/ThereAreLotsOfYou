@@ -71,7 +71,6 @@ public class StartState extends BasicGameState {
             }
         }
 
-
         synchronized (Collectible.getCollectibles()) {
             for(Collectible c : Collectible.getCollectibles()) {
                 c.render();
@@ -81,7 +80,9 @@ public class StartState extends BasicGameState {
         Level.render();
 
         SpriteStack.doDrawAll();
-        ui.render(g);
+        synchronized (ui) {
+            ui.render(g);
+        }
     }
 
     @Override
@@ -102,7 +103,9 @@ public class StartState extends BasicGameState {
                 player.updateAnimation(delta);
 
                 playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
-                ui.update(player);
+                synchronized (ui) {
+                    ui.update(player);
+                }
 
                 Collectible.getCollectibles().forEach(c -> c.update(delta));
                 cam.setTargetPos(player.getX(), player.getY());
@@ -177,6 +180,14 @@ public class StartState extends BasicGameState {
                             }
                         }
                     }
+                    else if (packetType == LotsOfYouGame.COUNTDOWN_PACKET) {
+                        int num = dataIN.readInt();
+                        synchronized (ui) {
+                            ui.setAnnouncement("" + (num != 0 ? num : ""));
+                        }
+                    } else if (packetType == LotsOfYouGame.RESTART_PACKET) {
+                        Level.InitLevel("LotsOfYou/src/lotsofyou/levels/test.txt", cam);
+                    }
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }
 
@@ -203,6 +214,12 @@ public class StartState extends BasicGameState {
                     if(input.pollUpdated()) {
                         dataOUT.writeInt(LotsOfYouGame.INPUT_PACKET);
                         input.send(dataOUT);
+                    }
+
+                    try {
+                        Thread.sleep(7);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
                     }
                 }
             } catch (IOException ex) {

@@ -4,11 +4,14 @@ import jig.Vector;
 import org.newdawn.slick.SlickException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class Level {
     private static Tilemap tilemap;
     private static boolean init = false;
+    private static final Vector spawnCenter = new Vector(0, 0);
+    private static final float spawnRadius = 100;
 
     public static void InitLevel(String targetLevel, Camera cam) {
         if(!init) {
@@ -109,6 +112,17 @@ public class Level {
 
     public static void render() {
         tilemap.draw();
+    }
+
+    public static void prepareForSpawn(Collection<Player> players) {
+        float step = 360.0f / players.size();
+        Vector offset = new Vector(spawnRadius, 0);
+        for(Player p : players) {
+            Vector playerPos = spawnCenter.add(offset);
+            p.setX(playerPos.getX());
+            p.setY(playerPos.getY());
+            offset = offset.rotate(step);
+        }
     }
 
 }
