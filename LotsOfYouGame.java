@@ -120,6 +120,12 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String ATTACK_RSC_3 =  "lotsofyou/resource/Animations/Attack/Player_attack_FRAME3.png";
 	public static final String ATTACK_RSC_4 =  "lotsofyou/resource/Animations/Attack/Player_attack_FRAME4.png";
 
+	public static final String CLAP_ATTACK_RSC_0 =  "lotsofyou/resource/Animations/clap_attack/0.png";
+	public static final String CLAP_ATTACK_RSC_1 =  "lotsofyou/resource/Animations/clap_attack/1.png";
+	public static final String CLAP_ATTACK_RSC_2 =  "lotsofyou/resource/Animations/clap_attack/2.png";
+	public static final String CLAP_ATTACK_RSC_3 =  "lotsofyou/resource/Animations/clap_attack/3.png";
+	public static final String CLAP_ATTACK_RSC_4 =  "lotsofyou/resource/Animations/clap_attack/4.png";
+
 	public static final String WALL_CORNER = "lotsofyou/resource/wall_corner.png";
 	public static final String WALL_CROSS = "lotsofyou/resource/wall_cross.png";
 	public static final String WALL_STRAIGHT = "lotsofyou/resource/wall_straight.png";
@@ -213,7 +219,9 @@ public class LotsOfYouGame extends StateBasedGame {
 			ResourceManager.loadImage("lotsofyou/resource/Animations/Attack/Player_attack_FRAME" + i + ".png");
 		}
 
-
+		for(int i=0; i < 5; i++) {
+			ResourceManager.loadImage("lotsofyou/resource/Animations/clap_attack/" + i + ".png");
+		}
 	}
 
 	public static void main(String[] args) {

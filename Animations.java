@@ -21,6 +21,7 @@ public class Animations {
 
     SpriteStackAnimation attackAnimation;
 
+    SpriteStackAnimation clapAttackAnimation;
 
     public Animations(Camera cam) throws SlickException {
 
@@ -93,12 +94,19 @@ public class Animations {
         walkingWithSwordAnimation = new SpriteStackAnimation(walkingSword, 150);
 
         SpriteStack[] attackFrames = new SpriteStack[5];
-        attackFrames[0] = new SpriteStack(LotsOfYouGame.ATTACK_RSC_0, 20, 40, cam);
+        attackFrames[0] = new SpriteStack(LotsOfYouGame.ATTACK_RSC_0, 10, 28, cam);
         attackFrames[1] = new SpriteStack(LotsOfYouGame.ATTACK_RSC_1, 20, 40, cam);
         attackFrames[2] = new SpriteStack(LotsOfYouGame.ATTACK_RSC_2, 20, 40, cam);
         attackFrames[3] = new SpriteStack(LotsOfYouGame.ATTACK_RSC_3, 20, 40, cam);
         attackFrames[4] = new SpriteStack(LotsOfYouGame.ATTACK_RSC_4, 20, 40, cam);
         attackAnimation = new SpriteStackAnimation(attackFrames, 150);
 
+        SpriteStack[] clapAttackFrames = new SpriteStack[5];
+        clapAttackFrames[0] = new SpriteStack(LotsOfYouGame.CLAP_ATTACK_RSC_0, 10, 7, cam);
+        clapAttackFrames[1] = new SpriteStack(LotsOfYouGame.CLAP_ATTACK_RSC_1, 10, 9, cam);
+        clapAttackFrames[2] = new SpriteStack(LotsOfYouGame.CLAP_ATTACK_RSC_2, 10, 9, cam);
+        clapAttackFrames[3] = new SpriteStack(LotsOfYouGame.CLAP_ATTACK_RSC_3, 10, 9, cam);
+        clapAttackFrames[4] = new SpriteStack(LotsOfYouGame.CLAP_ATTACK_RSC_4, 10, 9, cam);
+        clapAttackAnimation = new SpriteStackAnimation(clapAttackFrames, 150);
     }
 }
