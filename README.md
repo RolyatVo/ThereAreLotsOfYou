@@ -10,8 +10,11 @@ the last one standing.
 ##Controls 
 
 ```Right-Cick```: move the world to where you want to look 
+</br>
 ```Left-Click```: Attack
-```Shift```: Roll character 
+</br>
+```Shift```: Roll character
+</br>
 ```WASD```: Movement in each direction 
 
 
