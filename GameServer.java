@@ -40,6 +40,8 @@ public class GameServer {
             System.out.println("IO Exception from server");
         }
 
+        Level.InitLevel("LotsOfYou/src/lotsofyou/levels/test.txt");
+
         // Collectible.addCollectible(Collectible.Type.SWORD, new Vector(-64, -64));
     }
 
@@ -91,7 +93,7 @@ public class GameServer {
                 synchronized (players) {
                     for (Player p : players.getPlayers()) {
                         // System.out.println("Updating player " + p.getID());
-                        p.update(1000.0f / 60);
+                        p.update(1000.0f / 60, Level.getTilemap());
 
                         synchronized (removedCollectibles) {
                             for(Collectible c : Collectible.getCollectibles()) {
