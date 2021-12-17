@@ -131,6 +131,7 @@ public class Level {
             Collectible.clearCollectibles();
             tilemap.clear();
             InitLevel(targetLevel, cam);
+            reloadQueued = false;
         };
     }
 }

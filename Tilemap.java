@@ -61,6 +61,7 @@ public class Tilemap {
     }
 
     public void clear() {
+        System.out.println("Cleared");
         tiles.clear();
         map.clear();
     }
