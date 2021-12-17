@@ -60,6 +60,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String PLAYER_SHADOW_RSC = "lotsofyou/resource/player_shadow.png";
 	public static final String MINIMAP = "lotsofyou/resource/minimap.png";
 	public static final String PLAYER_MARKER = "lotsofyou/resource/player_marker.png";
+	public static final String DEATH_RSC = "lotsofyou/resource/death.png";
 
 	public static final String SWING_SND = "lotsofyou/resource/swing.wav";
 	public static final String STEP_SND = "lotsofyou/resource/step.wav";
@@ -190,6 +191,7 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(SWORD_RSC);
 		ResourceManager.loadImage(MINIMAP);
 		ResourceManager.loadImage(PLAYER_MARKER);
+		ResourceManager.loadImage(DEATH_RSC);
 
 
 

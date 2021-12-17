@@ -25,7 +25,13 @@ public class Animations {
 
     SpriteStackAnimation clapAttackAnimation;
 
+    SpriteStackAnimation deathAnimation;
+
     public Animations(Camera cam) throws SlickException {
+
+        SpriteStack[] death = new SpriteStack[1];
+        death[0] = new SpriteStack(LotsOfYouGame.DEATH_RSC, 10, 9, cam);
+        deathAnimation = new SpriteStackAnimation(death, 1000);
 
         SpriteStack[] walking = new SpriteStack[6];
         walking[0] = new SpriteStack(LotsOfYouGame.WALKING_RSC_1, 6, 7, cam);

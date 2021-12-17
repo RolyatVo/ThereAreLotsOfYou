@@ -122,6 +122,9 @@ public class Player {
 
     void update(float delta, Tilemap map) {
 
+        if(isDead())
+            return;
+
         float deltaSeconds = delta / 1000;
 
         switch (state) {
@@ -185,13 +188,11 @@ public class Player {
                         //just x
                         else if (xOverlap != 0) {
                             newCollider.setX(Math.round(newCollider.getX() - xOverlap));
-                            System.out.println("xOverlap: " + xOverlap);
                             xVel = 0;
                         }
                         //just y
                         else if (yOverlap != 0) {
                             newCollider.setY(Math.round(newCollider.getY() - yOverlap));
-                            System.out.println("yOverlap: " + yOverlap);
                             yVel = 0;
                         }
 
@@ -328,46 +329,50 @@ public class Player {
 
 
     public void render() {
-        if(state != prevRenderState) {
+        if(isDead()) {
+            currentAnimation = animations.deathAnimation;
+        } else {
+            if(state != prevRenderState) {
+                if(state == State.FREE) {
+                    if(xVel != 0 || yVel != 0) {
+                        if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
+                        if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
+                    } else {
+                        currentAnimation = animations.idleAnimation;
+                    }
+                }
+                else if(state == State.ROLLING) {
+                    if(swordLevel == 0) currentAnimation = animations.rollingAnimation;
+                    if(swordLevel == 1) currentAnimation = animations.rollingSwordAnimation;
+                } else if (state == State.ATTACKING) {
+                    if(swordLevel == 0) currentAnimation = animations.clapAttackAnimation;
+                    if(swordLevel == 1) currentAnimation = animations.attackAnimation;
+
+                    ResourceManager.getSound(LotsOfYouGame.SWING_SND).play();
+                }
+                currentAnimation.setFrame(0);
+            }
+
             if(state == State.FREE) {
-                if(xVel != 0 || yVel != 0) {
+                if (xVel != 0 || yVel != 0) {
                     if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
                     if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
+
+                    if(prevFrame != currentAnimation.getFrame() && currentAnimation.getFrame() % 3 == 0) {
+                        ResourceManager.getSound(LotsOfYouGame.STEP_SND).play();
+                    }
                 } else {
                     currentAnimation = animations.idleAnimation;
                 }
+
+                currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
             }
-            else if(state == State.ROLLING) {
-                if(swordLevel == 0) currentAnimation = animations.rollingAnimation;
-                if(swordLevel == 1) currentAnimation = animations.rollingSwordAnimation;
-            } else if (state == State.ATTACKING) {
-                if(swordLevel == 0) currentAnimation = animations.clapAttackAnimation;
-                if(swordLevel == 1) currentAnimation = animations.attackAnimation;
-
-                ResourceManager.getSound(LotsOfYouGame.SWING_SND).play();
+            else if(state == State.ATTACKING) {
+                currentAnimation.setRotation(attackRotation);
             }
-            currentAnimation.setFrame(0);
-        }
-
-        if(state == State.FREE) {
-            if (xVel != 0 || yVel != 0) {
-                if(swordLevel == 0) currentAnimation = animations.walkingAnimation;
-                if(swordLevel == 1) currentAnimation = animations.walkingWithSwordAnimation;
-
-                if(prevFrame != currentAnimation.getFrame() && currentAnimation.getFrame() % 3 == 0) {
-                    ResourceManager.getSound(LotsOfYouGame.STEP_SND).play();
-                }
-            } else {
-                currentAnimation = animations.idleAnimation;
+            else if (state == State.ROLLING) {
+                currentAnimation.setRotation(((360 - lookRotation) + (float)rollDir.getRotation()) % 360.0f);
             }
-
-            currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
-        }
-        else if(state == State.ATTACKING) {
-            currentAnimation.setRotation(attackRotation);
-        }
-        else if (state == State.ROLLING) {
-            currentAnimation.setRotation(((360 - lookRotation) + (float)rollDir.getRotation()) % 360.0f);
         }
 
         currentAnimation.draw(x - currentAnimation.getFrameWidth() / 2 ,y - currentAnimation.getFrameHeight() / 2);
