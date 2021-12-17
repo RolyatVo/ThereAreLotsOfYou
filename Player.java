@@ -340,7 +340,7 @@ public class Player {
     public void render() {
         if(state != prevRenderState) {
             if(state == State.FREE) {
-                if(input.up || input.down || input.left || input.right) {
+                if(xVel != 0 || yVel != 0) {
                     currentAnimation = animations.walkingAnimation;
                 } else {
                     currentAnimation = animations.idleAnimation;
@@ -350,6 +350,14 @@ public class Player {
                 currentAnimation = animations.rollingAnimation;
             }
             currentAnimation.setFrame(0);
+        }
+
+        if(state == State.FREE) {
+            if(xVel != 0 || yVel != 0) {
+                currentAnimation = animations.walkingAnimation;
+            } else {
+                currentAnimation = animations.idleAnimation;
+            }
         }
 
         if(state == State.FREE || state == State.ATTACKING) {
