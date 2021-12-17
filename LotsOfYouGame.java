@@ -114,6 +114,11 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String WALKING_SWORD_RSC_4 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME4.png";
 	public static final String WALKING_SWORD_RSC_5 = "lotsofyou/resource/Animations/Walking_Sword_10x11/Player_Walking_Sword_FRAME5.png";
 
+	public static final String WALL_CORNER = "lotsofyou/resource/wall_corner.png";
+	public static final String WALL_CROSS = "lotsofyou/resource/wall_cross.png";
+	public static final String WALL_STRAIGHT = "lotsofyou/resource/wall_straight.png";
+	public static final String WALL_T = "lotsofyou/resource/wall_t.png";
+
 	public final int ScreenWidth;
 	public final int ScreenHeight;
 	public static final int INPUT_PACKET = 0;
@@ -157,6 +162,11 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(PLAYER_TEST);
 		ResourceManager.loadImage(ARMOR_RSC);
 		ResourceManager.loadImage(SWORD_RSC);
+
+		ResourceManager.loadImage(WALL_CORNER);
+		ResourceManager.loadImage(WALL_CROSS);
+		ResourceManager.loadImage(WALL_STRAIGHT);
+		ResourceManager.loadImage(WALL_T);
 
 
 		//Walking Animations
