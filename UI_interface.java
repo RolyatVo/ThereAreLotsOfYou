@@ -32,7 +32,7 @@ public class UI_interface {
 
     public void update(Player player) {
         healthBar.update(player.getHealthNUM());
-        armorSection.update(3);
+        armorSection.update(player.getArmorPlates());
         weaponSection.update(true);
     }
 }

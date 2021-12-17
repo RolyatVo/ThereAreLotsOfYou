@@ -32,6 +32,7 @@ public class PlayerInput {
         this.roll = false;
         this.attack = false;
         this.lookRotation = 0.0f;
+        this.attackRotation = 0.0f;
     }
 
     public PlayerInput(PlayerInput other) {
@@ -45,6 +46,7 @@ public class PlayerInput {
         this.roll = other.roll;
         this.attack = other.attack;
         this.lookRotation = other.lookRotation;
+        this.attackRotation = other.attackRotation;
     }
 
     @Override
@@ -80,7 +82,6 @@ public class PlayerInput {
         if(in.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
             Vector mousePos = cam.screenToWorld(in.getMouseX(), in.getMouseY());
             lookRotation = (360.0f - ((float) mousePos.subtract(playerPos).getRotation() + 90)) % 360.0f;
-            System.out.println(lookRotation);
         }
 
         if(!prev.equals(this)) updated = true;

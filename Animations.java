@@ -5,6 +5,8 @@ import org.newdawn.slick.Animation;
 import org.newdawn.slick.SlickException;
 
 public class Animations {
+    SpriteStack playerShadow;
+
     SpriteStackAnimation idleAnimation;
 
     SpriteStackAnimation walkingAnimation;
@@ -24,8 +26,6 @@ public class Animations {
     SpriteStackAnimation clapAttackAnimation;
 
     public Animations(Camera cam) throws SlickException {
-
-
 
         SpriteStack[] walking = new SpriteStack[6];
         walking[0] = new SpriteStack(LotsOfYouGame.WALKING_RSC_1, 6, 7, cam);
@@ -73,7 +73,7 @@ public class Animations {
         rollingWithSwordFrames[6] = new SpriteStack(LotsOfYouGame.ROLLING_SWORD_RSC_6, 10, 11, cam);
         rollingWithSwordFrames[7] = new SpriteStack(LotsOfYouGame.ROLLING_SWORD_RSC_7, 10, 11, cam);
         rollingWithSwordFrames[8] = new SpriteStack(LotsOfYouGame.ROLLING_SWORD_RSC_8, 10, 11, cam);
-        rollingSwordAnimation = new SpriteStackAnimation(rollingWithSwordFrames, 150);
+        rollingSwordAnimation = new SpriteStackAnimation(rollingWithSwordFrames, 65);
 
         SpriteStack[] swordFrames = new SpriteStack[6];
         swordFrames[0] = new SpriteStack(LotsOfYouGame.SWORD_RSC_0, 10, 9, cam);

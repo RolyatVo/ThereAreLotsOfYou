@@ -29,7 +29,13 @@ public class Tilemap {
             while ((line = br.readLine()) != null) {
                 int col = 0;
                 for(char c: line.toCharArray()) {
-                    if(c != ' ') {
+                    if(c == 'S') {
+                        Collectible.addCollectible(Collectible.Type.SWORD, new Vector(16 * col, 16 * lineNum));
+                    }
+                    else if (c == 'A') {
+                        Collectible.addCollectible(Collectible.Type.ARMOR, new Vector(16 * col, 16 * lineNum));
+                    }
+                    else if(c != ' ') {
                         Tile cpy = new Tile(tiles.get(c));
                         cpy.setPos(new Vector(16 * col, 16 * lineNum));
                         map.add(cpy);
