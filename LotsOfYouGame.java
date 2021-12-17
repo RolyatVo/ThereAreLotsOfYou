@@ -58,6 +58,14 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final String ARMOR_RSC = "lotsofyou/resource/shield.png";
 	public static final String SWORD_RSC = "lotsofyou/resource/sword.png";
 	public static final String PLAYER_SHADOW_RSC = "lotsofyou/resource/player_shadow.png";
+	public static final String MINIMAP = "lotsofyou/resource/minimap.png";
+	public static final String PLAYER_MARKER = "lotsofyou/resource/player_marker.png";
+
+	public static final String SWING_SND = "lotsofyou/resource/swing.wav";
+	public static final String STEP_SND = "lotsofyou/resource/step.wav";
+	public static final String POWERUP_SND = "lotsofyou/resource/powerup.wav";
+	public static final String ARMOR_POWERUP_SND = "lotsofyou/resource/powerup_armor.wav";
+	public static final String HURT_SND = "lotsofyou/resource/hurt.wav";
 
 
 	//Walking PNGs
@@ -138,6 +146,10 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final int INPUT_PACKET = 0;
 	public static final int STATE_PACKET = 1;
 	public static final int REMOVE_COLLECTIBLE_PACKET = 2;
+	public static final int COUNTDOWN_PACKET = 3;
+	public static final int RESTART_PACKET = 4;
+	public static final int JOIN_PACKET = 5;
+	public static final int QUIT_PACKET = 6;
 
 	/**
 	 * Create the BounceGame frame, saving the width and height for later use.
@@ -176,6 +188,10 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(PLAYER_TEST);
 		ResourceManager.loadImage(ARMOR_RSC);
 		ResourceManager.loadImage(SWORD_RSC);
+		ResourceManager.loadImage(MINIMAP);
+		ResourceManager.loadImage(PLAYER_MARKER);
+
+
 
 		ResourceManager.loadImage(WALL_CORNER);
 		ResourceManager.loadImage(WALL_CROSS);
@@ -190,6 +206,12 @@ public class LotsOfYouGame extends StateBasedGame {
 		ResourceManager.loadImage(WALKING_RSC_4);
 		ResourceManager.loadImage(WALKING_RSC_5);
 		ResourceManager.loadImage(WALKING_RSC_6);
+
+		ResourceManager.loadSound(HURT_SND);
+		ResourceManager.loadSound(POWERUP_SND);
+		ResourceManager.loadSound(ARMOR_POWERUP_SND);
+		ResourceManager.loadSound(STEP_SND);
+		ResourceManager.loadSound(SWING_SND);
 
 		//Armour
 		for(int i=0; i < 8; i++) {

@@ -71,7 +71,6 @@ public class StartState extends BasicGameState {
             }
         }
 
-
         synchronized (Collectible.getCollectibles()) {
             for(Collectible c : Collectible.getCollectibles()) {
                 c.render();
@@ -81,7 +80,9 @@ public class StartState extends BasicGameState {
         Level.render();
 
         SpriteStack.doDrawAll();
-        ui.render(g);
+        synchronized (ui) {
+            ui.render(g);
+        }
     }
 
     @Override
@@ -102,7 +103,9 @@ public class StartState extends BasicGameState {
                 player.updateAnimation(delta);
 
                 playerInput.update(container.getInput(), cam, new Vector(player.getX(), player.getY()));
-                ui.update(player);
+                synchronized (ui) {
+                    ui.update(player);
+                }
 
                 Collectible.getCollectibles().forEach(c -> c.update(delta));
                 cam.setTargetPos(player.getX(), player.getY());
@@ -111,6 +114,8 @@ public class StartState extends BasicGameState {
                 playerInput.update(container.getInput(), cam, new Vector(0, 0));
             }
         }
+
+        Level.checkQueuedReload("LotsOfYou/src/lotsofyou/levels/test.txt", cam);
     }
 
     private Socket socket;
@@ -120,7 +125,7 @@ public class StartState extends BasicGameState {
 
     private void serverConnect() {
         try {
-            socket = new Socket("localhost", 55555);
+            socket = new Socket("localhost", 10000);
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
@@ -164,9 +169,10 @@ public class StartState extends BasicGameState {
                                 p.setPlayerState(st);
                             }
                             else {
-                                p = new Player(animations, 0, 0);
-                                p.setID(playerId);
-                                playerManager.addPlayer(p, playerId);
+                                System.out.println("Missing player!");
+//                                p = new Player(animations, 0, 0);
+//                                p.setID(playerId);
+//                                playerManager.addPlayer(p, playerId);
                             }
                         }
                     } else if (packetType == LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET) {
@@ -175,6 +181,27 @@ public class StartState extends BasicGameState {
                             for (int i = 0; i != size; ++i) {
                                 Collectible.removeCollectible(dataIN.readInt());
                             }
+                        }
+                    }
+                    else if (packetType == LotsOfYouGame.COUNTDOWN_PACKET) {
+                        int num = dataIN.readInt();
+                        synchronized (ui) {
+                            ui.setAnnouncement("" + (num != 0 ? num : ""));
+                        }
+                    } else if (packetType == LotsOfYouGame.RESTART_PACKET) {
+                        Level.queueReload();
+                    } else if (packetType == LotsOfYouGame.JOIN_PACKET) {
+                        int id = dataIN.readInt();
+                        Player p = new Player(animations, 0, 0);
+                        p.setID(id);
+                        synchronized (playerManager) {
+                            playerManager.addPlayer(p, id);
+                        }
+                    } else if (packetType == LotsOfYouGame.QUIT_PACKET) {
+                        int id = dataIN.readInt();
+                        synchronized (playerManager) {
+                            System.out.println("Removing player: " + id);
+                            playerManager.removePlayer(id);
                         }
                     }
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
@@ -203,6 +230,12 @@ public class StartState extends BasicGameState {
                     if(input.pollUpdated()) {
                         dataOUT.writeInt(LotsOfYouGame.INPUT_PACKET);
                         input.send(dataOUT);
+                    }
+
+                    try {
+                        Thread.sleep(7);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
                     }
                 }
             } catch (IOException ex) {
