@@ -82,6 +82,8 @@ public class StartState extends BasicGameState {
         }
 
         Level.render();
+
+        SpriteStack.doDrawAll();
     }
 
     @Override

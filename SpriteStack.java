@@ -4,6 +4,9 @@ import jig.Vector;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
+import org.pushingpixels.substance.api.colorscheme.TerracottaColorScheme;
+
+import java.util.PriorityQueue;
 
 public class SpriteStack extends SpriteSheet {
 
@@ -14,6 +17,16 @@ public class SpriteStack extends SpriteSheet {
 
     private int width;
     private int height;
+
+    static final PriorityQueue<ToDrawSpriteStack> toRender = new PriorityQueue<>();
+
+    static void doDrawAll() {
+        int i = 0;
+        while(!toRender.isEmpty()) {
+            ToDrawSpriteStack t = toRender.poll();
+            t.draw();
+        }
+    }
 
     public SpriteStack(String ref, int w, int h, Camera renderCam_) throws SlickException {
         super(ref, w, h);
@@ -30,6 +43,27 @@ public class SpriteStack extends SpriteSheet {
 
         this.width = w;
         this.height = h;
+    }
+
+    private class ToDrawSpriteStack implements Comparable<ToDrawSpriteStack> {
+        private float minY;
+        private Vector[] corners;
+        private SpriteStack target;
+
+        public ToDrawSpriteStack(float minY, SpriteStack target, Vector[] corners) {
+            this.minY = minY;
+            this.target = target;
+            this.corners = corners;
+        }
+
+        public void draw() {
+            target.doWarpedDraw(corners);
+        }
+
+        @Override
+        public int compareTo(ToDrawSpriteStack o) {
+            return (int)((minY - o.minY) * 1000);
+        }
     }
 
     public SpriteStack(SpriteStack other) throws SlickException {
@@ -50,8 +84,6 @@ public class SpriteStack extends SpriteSheet {
 
     @Override
     public void draw(float x, float y) {
-
-
         Vector corners[] = new Vector[4];
         for(int i = 0; i != 4; ++i) {
             Vector centerOffset = new Vector((i % 2) * height - (float)height / 2,
@@ -72,17 +104,68 @@ public class SpriteStack extends SpriteSheet {
             corners[i] = new Vector(newCenterOffsetX + halfRenderRes.getX(), newCenterOffsetY + halfRenderRes.getY());
         }
 
+        for(int i = 0; i != 4; ++i) {
+            corners[i] = new Vector(corners[i].getX() * renderCam.getScale(), corners[i].getY() * renderCam.getScale());
+        }
+
+//        float minY = corners[0].getY();
+//        for(int i = 1; i != 4; ++i) {
+//            if(corners[i].getY() < minY) {
+//                minY = corners[i].getY();
+//            }
+//        }
+
+        float maxY = corners[0].getY();
+        for(int i = 1; i != 4; ++i) {
+            if(corners[i].getY() > maxY) {
+                maxY = corners[i].getY();
+            }
+        }
+//        float minX = corners[0].getX();
+//        for(int i = 1; i != 4; ++i) {
+//            if(corners[i].getX() < minX) {
+//                minX = corners[i].getX();
+//            }
+//        }
+//
+//        float maxX = corners[0].getX();
+//        for(int i = 1; i != 4; ++i) {
+//            if(corners[i].getX() > maxX) {
+//                maxX = corners[i].getX();
+//            }
+//        }
+
+//        Rectangle bounding = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+//        Rectangle cameraBounding = new Rectangle(renderCam.getX(), renderCam.getY(), renderCam.getRenderWidth(), renderCam.getRenderHeight());
+
+//        if(bounding.intersects(cameraBounding)) {
+            toRender.add(new ToDrawSpriteStack(maxY, this, corners));
+//        }
+//        int offset = 0;
+//        for(int i = imgArr.length - 1; i != -1; --i) {
+//            imgArr[i].drawWarped(
+//                    corners[0].getX() * renderCam.getScale(), (corners[0].getY() - offset) * renderCam.getScale(),
+//                    corners[1].getX() * renderCam.getScale(), (corners[1].getY() - offset) * renderCam.getScale(),
+//                    corners[3].getX() * renderCam.getScale(), (corners[3].getY() - offset) * renderCam.getScale(),
+//                    corners[2].getX() * renderCam.getScale(), (corners[2].getY() - offset) * renderCam.getScale()
+//            );
+//            ++offset;
+//        }
+    }
+
+    public void doWarpedDraw(Vector[] corners) {
         int offset = 0;
         for(int i = imgArr.length - 1; i != -1; --i) {
             imgArr[i].drawWarped(
-                    corners[0].getX() * renderCam.getScale(), (corners[0].getY() - offset) * renderCam.getScale(),
-                    corners[1].getX() * renderCam.getScale(), (corners[1].getY() - offset) * renderCam.getScale(),
-                    corners[3].getX() * renderCam.getScale(), (corners[3].getY() - offset) * renderCam.getScale(),
-                    corners[2].getX() * renderCam.getScale(), (corners[2].getY() - offset) * renderCam.getScale()
+                    corners[0].getX(), corners[0].getY() - (offset * renderCam.getScale()),
+                    corners[1].getX(), corners[1].getY() - (offset * renderCam.getScale()),
+                    corners[3].getX(), corners[3].getY() - (offset * renderCam.getScale()),
+                    corners[2].getX(), corners[2].getY() - (offset * renderCam.getScale())
             );
             ++offset;
         }
     }
+
     public int getFrameWidth() {
         return this.width;
     }
