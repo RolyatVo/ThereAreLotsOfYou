@@ -56,11 +56,11 @@ public class Player {
     private float actionTime;
     private static final float rollTimeMax = 0.5f;
     private static final float attackTimeMax = 0.5f;
-    private final float clapOffset = 5.0f;
-    private final float clapRadius = 10.0f;
+    private final float clapOffset = 3.0f;
+    private final float clapRadius = 6.0f;
 
-    private final float swordOffset = 20.0f;
-    private final float swordRadius = 50.0f;
+    private final float swordOffset = 7.5f;
+    private final float swordRadius = 15;
 
     private Vector rollDir;
 
@@ -276,7 +276,7 @@ public class Player {
         float attackRadius = clapRadius;
         float attackOffset = clapOffset;
 
-        if(swordLevel > 0) {
+        if(other.swordLevel > 0) {
             attackRadius = swordRadius;
             attackOffset = swordOffset;
         }
@@ -284,9 +284,9 @@ public class Player {
         if(other.state == State.ATTACKING && state != State.ROLLING) {
             Vector ourPos = new Vector(x, y);
             Vector otherPos = new Vector(other.x, other.y);
-            return otherPos.add(
-                    new Vector(1, 0).setRotation(other.attackRotation).setLength(attackOffset)
-            ).distance(ourPos) < attackRadius;
+            Vector centerPos = otherPos.add(new Vector(1, 0).setLength(attackOffset).setRotation(other.attackRotation));
+            System.out.println("Attack: " + centerPos + ", r: " + attackRadius);
+            return centerPos.distance(ourPos) < attackRadius;
         }
         return false;
     }
@@ -385,15 +385,21 @@ public class Player {
         state = State.values()[targetState.state];
     }
 
-//    public void drawDebug(Graphics g, Camera cam) {
-//        if(state == State.ATTACKING) {
-//            System.out.println("Cam Pos: " + cam.getPos().getX() + ", " + cam.getPos().getY());
-//            Vector worldPos = new Vector(x, y).add(new Vector(5, 0).setRotation(lookRotation).setLength(attackOffset));
-//            System.out.println("World Pos: " + worldPos.getX() + ", " + worldPos.getY());
-//            float viewableAttackRadius = attackRadius * cam.getScale();
-//            g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
-//        }
-//    }
+    public void drawDebug(Graphics g, Camera cam) {
+        float attackRadius = clapRadius;
+        float attackOffset = clapOffset;
+
+        if(swordLevel > 0) {
+            attackRadius = swordRadius;
+            attackOffset = swordOffset;
+        }
+
+        if(state == State.ATTACKING) {
+            Vector worldPos = new Vector(x, y).add(new Vector(5, 0).setLength(attackOffset).setRotation(attackRotation + cam.getRotation()));
+            float viewableAttackRadius = attackRadius * cam.getScale();
+            g.fillOval((worldPos.getX() - attackRadius / 2 - cam.getPos().getX()) * cam.getScale(), (worldPos.getY() - attackRadius / 2 - cam.getPos().getY()) * cam.getScale(), viewableAttackRadius, viewableAttackRadius);
+        }
+    }
 
     public boolean canCollect(Collectible c) {
         if(c.getType() == Collectible.Type.SWORD) return swordLevel < 1;

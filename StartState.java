@@ -67,7 +67,7 @@ public class StartState extends BasicGameState {
         synchronized (playerManager) {
             for (Player p : playerManager.getPlayers()) {
                 p.render();
-//                p.drawDebug(g, cam);
+                p.drawDebug(g, cam);
             }
         }
 

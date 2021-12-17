@@ -169,7 +169,6 @@ public class GameServer {
                                 }
                                 if(p.isDead()) ++deadCount;
                             }
-                            System.out.println(deadCount);
                             if(players.getPlayers().size() - deadCount <= 1) {
                                 restartGame();
                             }
