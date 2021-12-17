@@ -32,8 +32,8 @@ public class Player {
     //the direction the player is looking
     private float lookRotation;
     //the forward movement direction directions
-    private float moveRotation;
-    private float targetMoveRotation;
+    private float attackRotation;
+    private float targetLookRotation;
 
     private int keyPress;
     private int ID;
@@ -75,8 +75,8 @@ public class Player {
         this.x = x;
         this.y = y;
         this.lookRotation = 0;
-        this.moveRotation = 0;
-        this.targetMoveRotation = 0;
+        this.attackRotation = 0;
+        this.targetLookRotation = 0;
         this.actionTime = 0;
         this.rollDir = new Vector(0, 0);
         this.input = new PlayerInput();
@@ -92,8 +92,8 @@ public class Player {
         this.x = x;
         this.y = y;
         this.lookRotation = 0;
-        this.moveRotation = 0;
-        this.targetMoveRotation = 0;
+        this.attackRotation = 0;
+        this.targetLookRotation = 0;
         this.actionTime = 0;
         this.rollDir = new Vector(0, 0);
         this.input = new PlayerInput();
@@ -114,8 +114,8 @@ public class Player {
         ID = id;
 
         this.lookRotation = 0;
-        this.moveRotation = 0;
-        this.targetMoveRotation = 0;
+        this.attackRotation = 0;
+        this.targetLookRotation = 0;
         this.actionTime = 0;
         this.rollDir = new Vector(0, 0);
         this.input = new PlayerInput();
@@ -228,17 +228,11 @@ public class Player {
     }
 
     private void free(float deltaSeconds) {
-        if(input.rotateLeft) {
-            targetMoveRotation += rotationAmount;
-        } else if (input.rotateRight) {
-            targetMoveRotation -= rotationAmount;
-        }
+        targetLookRotation = input.lookRotation;
 
-        if(Math.abs(targetMoveRotation - moveRotation) < Math.abs(moveRotation - targetMoveRotation)) {
-            moveRotation += moveRatio * (targetMoveRotation - moveRotation);
-        } else {
-            moveRotation -= moveRatio * (moveRotation - targetMoveRotation);
-        }
+        System.out.println(180.0f + " -> " + (targetLookRotation + (180.0f - lookRotation)) % 360.0f);
+
+        lookRotation += moveRatio * (((targetLookRotation + (180.0f - lookRotation)) % 360.0f) - 180.0f);
 
         keyPress = -1;
         int xDir = 0;
@@ -248,16 +242,11 @@ public class Player {
         if(input.up) { --yDir; keyPress = Keyboard.KEY_W; }
         if(input.down) { ++yDir; keyPress = Keyboard.KEY_S; }
 
-        xVel = (float)Math.sin(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
-        yVel = (float)Math.cos(Math.toRadians(moveRotation)) * (yDir * moveSpeed * deltaSeconds);
+        xVel = (float)Math.sin(Math.toRadians(lookRotation)) * (yDir * moveSpeed * deltaSeconds);
+        yVel = (float)Math.cos(Math.toRadians(lookRotation)) * (yDir * moveSpeed * deltaSeconds);
 
-        xVel += (float)Math.sin(Math.toRadians(moveRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
-        yVel += (float)Math.cos(Math.toRadians(moveRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
-
-      //  if(playerSprite != null) playerSprite.setRotation(input.lookRotation);
-      //  if(playerAnimation != null) playerAnimation.setRotation(input.lookRotation);
-
-        lookRotation = input.lookRotation;
+        xVel += (float)Math.sin(Math.toRadians(lookRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
+        yVel += (float)Math.cos(Math.toRadians(lookRotation + 90)) * (xDir * moveSpeed * deltaSeconds);
 
 
         if(input.attack) {
@@ -279,11 +268,11 @@ public class Player {
     }
 
     private void rolling(float deltaSeconds) {
-        xVel = (float)Math.sin(Math.toRadians(moveRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
-        yVel = (float)Math.cos(Math.toRadians(moveRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
+        xVel = (float)Math.sin(Math.toRadians(lookRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
+        yVel = (float)Math.cos(Math.toRadians(lookRotation)) * (rollDir.getY() * rollSpeed * deltaSeconds);
 
-        xVel += (float)Math.sin(Math.toRadians(moveRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
-        yVel += (float)Math.cos(Math.toRadians(moveRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
+        xVel += (float)Math.sin(Math.toRadians(lookRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
+        yVel += (float)Math.cos(Math.toRadians(lookRotation + 90)) * (rollDir.getX() * rollSpeed * deltaSeconds);
 
         if(actionTime > rollTimeMax) { state = State.FREE; }
         actionTime += deltaSeconds;
@@ -302,7 +291,7 @@ public class Player {
             Vector ourPos = new Vector(x, y);
             Vector otherPos = new Vector(other.x, other.y);
             return otherPos.add(
-                    new Vector(0, 0).setRotation(other.lookRotation).setLength(attackOffset)
+                    new Vector(0, 0).setRotation(other.attackRotation).setLength(attackOffset)
             ).distance(ourPos) < attackRadius;
         }
         return false;
@@ -353,42 +342,40 @@ public class Player {
         }
 
         if(state == State.FREE) {
-            if(xVel != 0 || yVel != 0) {
+            if (xVel != 0 || yVel != 0) {
                 currentAnimation = animations.walkingAnimation;
             } else {
                 currentAnimation = animations.idleAnimation;
             }
-        }
 
-        if(state == State.FREE || state == State.ATTACKING) {
-            currentAnimation.setRotation(lookRotation);
+            currentAnimation.setRotation((270.0f - lookRotation) % 360.0f);
+        }
+        else if(state == State.ATTACKING) {
+            currentAnimation.setRotation(attackRotation);
         }
         else if (state == State.ROLLING) {
-            currentAnimation.setRotation((float)rollDir.getRotation());
+            currentAnimation.setRotation(((360 - lookRotation) + (float)rollDir.getRotation()) % 360.0f);
         }
 
         currentAnimation.draw(x - currentAnimation.getFrameWidth() / 2 ,y - currentAnimation.getFrameHeight() / 2);
         prevRenderState = state;
     }
 
-    public float getMoveRotation() {
-        return this.moveRotation;
-    }
-
     public PlayerState getPlayerState() {
-        return new PlayerState(x, y, xVel, yVel, prevXVel, prevYVel, lookRotation, moveRotation, targetMoveRotation, healthNUM, armorPlates, actionTime, rollDir, state);
+        return new PlayerState(x, y, xVel, yVel, prevXVel, prevYVel, lookRotation, attackRotation, targetLookRotation, healthNUM, armorPlates, actionTime, rollDir, state);
     }
 
     public void setPlayerState(PlayerState targetState) {
         x = targetState.x;
         y = targetState.y;
+
         xVel = targetState.xVel;
         yVel = targetState.yVel;
         prevXVel = targetState.prevXVel;
         prevYVel = targetState.prevYVel;
         lookRotation = targetState.lookRotation;
-        moveRotation = targetState.moveRotation;
-        targetMoveRotation = targetState.targetMoveRotation;
+        attackRotation = targetState.attackRotation;
+        targetLookRotation = targetState.targetLookRotation;
         healthNUM = targetState.health;
         armorPlates = targetState.armorPlates;
         actionTime = targetState.actionTime;
@@ -408,5 +395,9 @@ public class Player {
 
     public void collect(Collectible c) {
         System.out.println("Collected " + c.getType().name() + "!");
+    }
+
+    public float getLookRotation() {
+        return this.lookRotation;
     }
 }

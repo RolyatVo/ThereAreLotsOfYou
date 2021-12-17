@@ -14,8 +14,8 @@ public class PlayerState {
     float prevXVel;
     float prevYVel;
     float lookRotation;
-    float moveRotation;
-    float targetMoveRotation;
+    float attackRotation;
+    float targetLookRotation;
     int health;
     int armorPlates;
     float actionTime;
@@ -26,7 +26,7 @@ public class PlayerState {
     public PlayerState() {};
 
     public PlayerState(float x_, float y_, float xVel, float yVel, float prevXVel, float prevYVel,
-                       float lookRotation_, float moveRotation_, float targetMoveRotation_, int health_, int armorPlates_,
+                       float lookRotation_, float attackRotation_, float targetLookRotation_, int health_, int armorPlates_,
                        float actionTime_, Vector rollDir, Player.State state_) {
         this.x = x_;
         this.y = y_;
@@ -35,8 +35,8 @@ public class PlayerState {
         this.prevXVel = prevXVel;
         this.prevYVel = prevYVel;
         this.lookRotation = lookRotation_;
-        this.moveRotation = moveRotation_;
-        this.targetMoveRotation = targetMoveRotation_;
+        this.attackRotation = attackRotation_;
+        this.targetLookRotation = targetLookRotation_;
         this.health = health_;
         this.armorPlates = armorPlates_;
         this.actionTime = actionTime_;
@@ -54,8 +54,8 @@ public class PlayerState {
         dataOutputStream.writeFloat(prevYVel);
 
         dataOutputStream.writeFloat(lookRotation);
-        dataOutputStream.writeFloat(moveRotation);
-        dataOutputStream.writeFloat(targetMoveRotation);
+        dataOutputStream.writeFloat(attackRotation);
+        dataOutputStream.writeFloat(targetLookRotation);
 
         dataOutputStream.writeInt(health);
         dataOutputStream.writeInt(armorPlates);
@@ -76,8 +76,8 @@ public class PlayerState {
         prevYVel = dataInputStream.readFloat();
 
         lookRotation = dataInputStream.readFloat();
-        moveRotation = dataInputStream.readFloat();
-        targetMoveRotation = dataInputStream.readFloat();
+        attackRotation = dataInputStream.readFloat();
+        targetLookRotation = dataInputStream.readFloat();
 
         health = dataInputStream.readInt();
         armorPlates = dataInputStream.readInt();
