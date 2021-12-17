@@ -169,9 +169,10 @@ public class StartState extends BasicGameState {
                                 p.setPlayerState(st);
                             }
                             else {
-                                p = new Player(animations, 0, 0);
-                                p.setID(playerId);
-                                playerManager.addPlayer(p, playerId);
+                                System.out.println("Missing player!");
+//                                p = new Player(animations, 0, 0);
+//                                p.setID(playerId);
+//                                playerManager.addPlayer(p, playerId);
                             }
                         }
                     } else if (packetType == LotsOfYouGame.REMOVE_COLLECTIBLE_PACKET) {
@@ -189,6 +190,11 @@ public class StartState extends BasicGameState {
                         }
                     } else if (packetType == LotsOfYouGame.RESTART_PACKET) {
                         Level.queueReload();
+                    } else if (packetType == LotsOfYouGame.JOIN_PACKET) {
+                        int id = dataIN.readInt();
+                        Player p = new Player(animations, 0, 0);
+                        p.setID(id);
+                        playerManager.addPlayer(p, id);
                     }
                    // System.out.println("Enemy " + enemyID + ": X: " + playerCoords[enemyID].getX() + " Y: " + playerCoords[enemyID].getY());
                 }

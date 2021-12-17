@@ -1,6 +1,7 @@
 package lotsofyou;
 
 import jig.Vector;
+import org.newdawn.slick.util.pathfinding.navmesh.Link;
 
 import java.io.*;
 import java.net.*;
@@ -75,9 +76,32 @@ public class GameServer {
                     ReadClient rc = new ReadClient(playerCount, serverIn);
                     WriteClient wc = new WriteClient(playerCount, serverOut);
 
+                    for(WriteClient wr : playersWriteRunnable) {
+                        wr.queueNewPlayer(playerCount);
+                    }
+
                     playerSockets.add(server);
                     playersWriteRunnable.add(wc);
                     playersReadRunnable.add(rc);
+
+                    synchronized (players) {
+                        players.addPlayer(new Player(0, 0, playerCount), playerCount);
+                        synchronized (state) {
+                            if(state == GameServerState.RUNNING) {
+                                players.getPlayer(playerCount).damage(10000);
+                            } else {
+                                Level.prepareForSpawn(players.getPlayers());
+                            }
+                        }
+
+                        System.out.println("New Player! Id: " + playerCount);
+
+
+                        for (Player p : players.getPlayers()) {
+                            serverOut.writeInt(LotsOfYouGame.JOIN_PACKET);
+                            serverOut.writeInt(p.getID());
+                        }
+                    }
 
                     Thread readClients = new Thread(playersReadRunnable.get(playersReadRunnable.size()-1));
 
@@ -225,11 +249,13 @@ public class GameServer {
                                 p.setPlayerInput(in);
                             } else {
                                 synchronized (state) {
-                                    if(state == GameServerState.WAITING) {
-                                        players.addPlayer(new Player(0, 0, playerID), playerID);
-                                        Level.prepareForSpawn(players.getPlayers());
-                                        System.out.println("New Player! Id: " + playerID);
-                                    }
+                                    System.out.println("Missing player!");
+//                                    if(state == GameServerState.WAITING) {
+//
+//                                        players.addPlayer(new Player(0, 0, playerID), playerID);
+//                                        Level.prepareForSpawn(players.getPlayers());
+//                                        System.out.println("New Player! Id: " + playerID);
+//                                    }
                                 }
                             }
                         }
@@ -258,6 +284,7 @@ public class GameServer {
         private DataOutputStream dataOUT;
         private final ArrayList<Integer> removeCollectiblesCopy;
         private final LinkedList<String> messageQueue;
+        private final ArrayList<Integer> newPlayers;
 
         private int prevSecondsRemaining;
 
@@ -271,7 +298,14 @@ public class GameServer {
             System.out.println("Write: " + playerID + " Runnable created");
             removeCollectiblesCopy = new ArrayList<>();
             messageQueue = new LinkedList<>();
+            newPlayers = new ArrayList<>();
             shouldRestart = false;
+        }
+
+        public void queueNewPlayer(int pid) {
+            synchronized (newPlayers) {
+                newPlayers.add(pid);
+            }
         }
 
         public void setShouldRestart() {
@@ -307,6 +341,14 @@ public class GameServer {
                             }
                         }
                         removeCollectiblesCopy.clear();
+                    }
+
+                    synchronized (newPlayers) {
+                        for(int i : newPlayers) {
+                            dataOUT.writeInt(LotsOfYouGame.JOIN_PACKET);
+                            dataOUT.writeInt(i);
+                        }
+                        newPlayers.clear();
                     }
 
                     int secondsRemaining = (waitTickMax - waitTick) / 60;

@@ -148,6 +148,7 @@ public class LotsOfYouGame extends StateBasedGame {
 	public static final int REMOVE_COLLECTIBLE_PACKET = 2;
 	public static final int COUNTDOWN_PACKET = 3;
 	public static final int RESTART_PACKET = 4;
+	public static final int JOIN_PACKET = 5;
 
 	/**
 	 * Create the BounceGame frame, saving the width and height for later use.
